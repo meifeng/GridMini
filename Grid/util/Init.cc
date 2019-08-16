@@ -615,7 +615,7 @@ void Grid_sa_signal_handler(int sig,siginfo_t *si,void * ptr)
 #endif
 #endif
   fflush(stderr);
-  BACKTRACEFP(stderr);
+  //BACKTRACEFP(stderr);
   fprintf(stderr,"Called backtrace\n");
   fflush(stdout);
   fflush(stderr);
@@ -625,7 +625,7 @@ void Grid_sa_signal_handler(int sig,siginfo_t *si,void * ptr)
 
 void Grid_exit_handler(void)
 {
-  BACKTRACEFP(stdout);
+  //BACKTRACEFP(stdout);
   fflush(stdout);
 }
 void Grid_debug_handler_init(void)
