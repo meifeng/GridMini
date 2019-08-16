@@ -35,12 +35,12 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (48)
-#define LMIN (8)
-#define LADD (8)
+#define LMAX (32)
+#define LMIN (4)
+#define LADD (4)
 
   int64_t Nwarm=50;
-  int64_t Nloop=500;
+  int64_t Nloop=1000;
 
   Coordinate simd_layout = GridDefaultSimd(Nd,vComplex::Nsimd());
   Coordinate mpi_layout  = GridDefaultMpi();
