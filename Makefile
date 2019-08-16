@@ -1,15 +1,19 @@
 GPUARCH=-m64 -gencode arch=compute_60,code=sm_60
 MAIN=benchmarks/Benchmark_su3
 
-#PGI
-CXX=pgc++
-CXXFLAGS=-fast --c++14 -mp -Mllvm -Minfo=accel
+##PGI
+#CXX=pgc++
+#CXXFLAGS=-fast --c++14 -mp -Mllvm -Minfo=accel
 
-#NVCC
+##Clang
+CXX=clang++
+CXXFLAGS=-std=c++14 -fopenmp -O3
+
+##NVCC
 #CXX=nvcc
 #CXXFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
 
-#GCC
+##GCC
 #CXX=g++
 #CXXFLAGS=-std=c++14 -O3 -fopenmp
 
