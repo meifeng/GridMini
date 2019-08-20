@@ -35,7 +35,7 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (32)
+#define LMAX (64)
 #define LMIN (4)
 #define LADD (4)
 
@@ -45,6 +45,9 @@ int main (int argc, char ** argv)
   Coordinate simd_layout = GridDefaultSimd(Nd,vComplex::Nsimd());
   Coordinate mpi_layout  = GridDefaultMpi();
 
+#ifdef _OPENACC
+  std::cout<<"OpenACC"<<std::endl;
+#endif
   int64_t threads = GridThread::GetThreads();
   std::cout<<GridLogMessage << "Grid is setup to use "<<threads<<" threads"<<std::endl;
   std::cout<<GridLogMessage << "Grid is setup to use "<<Nd<<" dimensions"<<std::endl;

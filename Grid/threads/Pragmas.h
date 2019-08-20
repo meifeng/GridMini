@@ -45,12 +45,25 @@ Author: paboyle <paboyle@ph.ed.ac.uk>
 #include <omp.h>
 #endif
 
+#ifdef _OPENACC
+#define GRID_ACC
+#endif
+
 #ifdef GRID_OMP
 #define DO_PRAGMA_(x) _Pragma ("x")
 #define DO_PRAGMA(x) DO_PRAGMA_(x)
 #define thread_num(a) omp_get_thread_num()
 #define thread_max(a) omp_get_max_threads()
-#else 
+#elif defined(GRID_ACC)
+#define DO_PRAGMA_(x) _Pragma ("x")
+#define DO_PRAGMA(x) DO_PRAGMA_(x)
+#ifdef _PGI
+#define thread_num(a) __pgi_threadidx() 
+#else
+#define thread_num(a) 0
+#endif
+#define thread_max(a) 1
+#else
 #define DO_PRAGMA_(x) 
 #define DO_PRAGMA(x) 
 #define thread_num(a) (0)
@@ -59,6 +72,7 @@ Author: paboyle <paboyle@ph.ed.ac.uk>
 
 #define naked_for(i,num,...) for ( uint64_t i=0;i<num;i++) { __VA_ARGS__ } ;
 #define naked_foreach(i,container,...) for ( uint64_t i=container.begin();i<container.end();i++) { __VA_ARGS__ } ;
+#ifdef GRID_OMP
 #define thread_for( i, num, ... )                           DO_PRAGMA(omp parallel for schedule(static)) naked_for(i,num,{__VA_ARGS__});
 #define thread_foreach( i, num, ... )                       DO_PRAGMA(omp parallel for schedule(static)) naked_foreach(i,num,{__VA_ARGS__});
 #define thread_for_in_region( i, num, ... )                 DO_PRAGMA(omp for schedule(static))          naked_for(i,num,{__VA_ARGS__});
@@ -67,7 +81,25 @@ Author: paboyle <paboyle@ph.ed.ac.uk>
 #define thread_for_collapse_in_region( N , i, num, ... )    DO_PRAGMA(omp for collapse ( N ))            naked_for(i,num,{__VA_ARGS__});
 #define thread_region                                       DO_PRAGMA(omp parallel)
 #define thread_critical                                     DO_PRAGMA(omp critical)
-
+#elif defined(GRID_ACC)
+#define thread_for( i, num, ... )                           DO_PRAGMA(acc parallel loop) naked_for(i,num,{__VA_ARGS__});
+#define thread_foreach( i, num, ... )                       DO_PRAGMA(acc parallel loop independent) naked_foreach(i,num,{__VA_ARGS__});
+#define thread_for_in_region( i, num, ... )                 DO_PRAGMA(acc loop independent)          naked_for(i,num,{__VA_ARGS__});
+#define thread_for_collapse2( i, num, ... )                 DO_PRAGMA(acc parallel loop collapse(2))      naked_for(i,num,{__VA_ARGS__});
+#define thread_for_collapse( N , i, num, ... )              DO_PRAGMA(acc parallel loop collapse ( N ) )  naked_for(i,num,{__VA_ARGS__});
+#define thread_for_collapse_in_region( N , i, num, ... )    DO_PRAGMA(acc loop collapse ( N ))            naked_for(i,num,{__VA_ARGS__});
+#define thread_region                                       DO_PRAGMA(acc parallel)
+#define thread_critical                                     DO_PRAGMA(acc critical)
+#else
+#define thread_for( i, num, ... )                           naked_for(i,num,{__VA_ARGS__});
+#define thread_foreach( i, num, ... )                       naked_foreach(i,num,{__VA_ARGS__});
+#define thread_for_in_region( i, num, ... )                 naked_for(i,num,{__VA_ARGS__});
+#define thread_for_collapse2( i, num, ... )                 naked_for(i,num,{__VA_ARGS__});
+#define thread_for_collapse( N , i, num, ... )              naked_for(i,num,{__VA_ARGS__});
+#define thread_for_collapse_in_region( N , i, num, ... )    naked_for(i,num,{__VA_ARGS__});
+#define thread_region                                       
+#define thread_critical                                     
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////
 // Accelerator primitives; fall back to threading
