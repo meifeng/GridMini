@@ -213,6 +213,7 @@ public:
     if ( this->_odata_size ) {
       dealloc();
     }
+   // #pragma acc exit data copyout(this[0:1])
    }
   ////////////////////////////////////////////////////////////////////////////////
   // Expression Template closure support
@@ -230,6 +231,7 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+   #pragma acc parallel loop independent copyin(expr[0:1])
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
@@ -249,6 +251,7 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+    #pragma acc parallel loop independent copyin(expr[0:1])
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
@@ -339,6 +342,7 @@ public:
     resize(this->_grid->oSites());
     assert((((uint64_t)&this->_odata[0])&0xF) ==0);
     this->checkerboard=0;
+  //  #pragma acc enter data copyin(this[0:1])
   }
   
   //  virtual ~Lattice(void) = default;
@@ -358,6 +362,8 @@ public:
     this->_grid = r.Grid();
     resize(this->_grid->oSites());
     *this = r;
+  //  #pragma acc enter data copyin(this[0:1])
+
   }
   ///////////////////////////////////////////
   // move constructor
@@ -369,6 +375,7 @@ public:
     this->checkerboard= r.Checkerboard();
     r._odata      = nullptr;
     r._odata_size = 0;
+  //  #pragma acc enter data copyin(this[0:1])
   }
   ///////////////////////////////////////////
   // assignment template

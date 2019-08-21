@@ -157,6 +157,14 @@ void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
   accelerator_forNB(iterator, num, nsimd, { __VA_ARGS__ } );	\
   accelerator_barrier(dummy);
 
+#elif defined(GRID_ACC)
+
+#define accelerator 					
+#define accelerator_inline 		strong_inline
+#define accelerator_for(iterator,num,nsimd, ... )       naked_for(iterator,num,{__VA_ARGS__});
+#define accelerator_forNB(iterator,num,nsimd, ... )     naked_for(iterator,num,{__VA_ARGS__});
+#define accelerator_barrier(dummy)			//DO_PRAGMA(acc wait) 
+
 #else
 
 #define accelerator 
