@@ -1,4 +1,4 @@
-GPUARCH=-m64 -gencode arch=compute_60,code=sm_60
+GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
 MAIN=Benchmark_su3
 
 ##PGI
@@ -6,12 +6,12 @@ MAIN=Benchmark_su3
 #CXXFLAGS=-fast --c++14 -mp -Mllvm -Minfo=accel
 
 ##Clang
-CXX=clang++
-CXXFLAGS=-std=c++14 -fopenmp -O3
+#CXX=clang++
+#CXXFLAGS=-std=c++14 -fopenmp -O3
 
 ##NVCC
-#CXX=nvcc
-#CXXFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
+CXX=nvcc
+CXXFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
 
 ##GCC
 #CXX=g++
