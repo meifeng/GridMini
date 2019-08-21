@@ -1,5 +1,5 @@
 GPUARCH=-m64 -gencode arch=compute_60,code=sm_60
-MAIN=benchmarks/Benchmark_su3
+MAIN=Benchmark_su3
 
 ##PGI
 #CXX=pgc++
@@ -7,7 +7,7 @@ MAIN=benchmarks/Benchmark_su3
 
 ##Clang
 CXX=clang++
-CXXFLAGS=-std=c++14 -fopenmp -O3
+CXXFLAGS=-std=c++14 -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda
 
 ##NVCC
 #CXX=nvcc
@@ -23,7 +23,7 @@ INCLUDES=./
 
 all:
 	$(CXX) $(CXXFLAGS) -I$(INCLUDES) \
-		${MAIN}.cc \
+		benchmarks/${MAIN}.cc \
                 Grid/util/Init.cc \
                 Grid/communicator/SharedMemory.cc \
                 Grid/communicator/SharedMemoryNone.cc \
@@ -37,5 +37,6 @@ all:
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_SINGLE \
-                -DRNG_RANLUX
+                -DRNG_RANLUX \
+		-DOMPTARGET
 
