@@ -1,5 +1,5 @@
 GPUARCH=-m64 -gencode arch=compute_60,code=sm_60
-MAIN=benchmarks/Benchmark_su3
+MAIN=Benchmark_su3
 
 ##PGI
 #CXX=pgc++
@@ -23,7 +23,7 @@ INCLUDES=./
 
 all:
 	$(CXX) $(CXXFLAGS) -I$(INCLUDES) \
-		${MAIN}.cc \
+		benchmarks/${MAIN}.cc \
                 Grid/util/Init.cc \
                 Grid/communicator/SharedMemory.cc \
                 Grid/communicator/SharedMemoryNone.cc \
