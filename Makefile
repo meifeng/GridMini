@@ -7,7 +7,7 @@ MAIN=Benchmark_su3
 
 ##Clang
 CXX=clang++
-CXXFLAGS=-std=c++14 -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda
+CXXFLAGS=-std=c++11 -fopenmp -O3 -fopenmp-targets=nvptx64
 
 ##NVCC
 #CXX=nvcc
@@ -18,11 +18,10 @@ CXXFLAGS=-std=c++14 -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda
 #CXXFLAGS=-std=c++14 -O3 -fopenmp
 
 
-INCLUDES=./
-
-
+INCLUDES=-I./ 
+LDFLAGS=
 all:
-	$(CXX) $(CXXFLAGS) -I$(INCLUDES) \
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) \
 		benchmarks/${MAIN}.cc \
                 Grid/util/Init.cc \
                 Grid/communicator/SharedMemory.cc \

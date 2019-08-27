@@ -49,6 +49,7 @@ int main (int argc, char ** argv)
   std::cout<<GridLogMessage << "Grid is setup to use "<<threads<<" threads"<<std::endl;
   std::cout<<GridLogMessage << "Grid is setup to use "<<Nd<<" dimensions"<<std::endl;
 
+#if 0
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
   std::cout<<GridLogMessage << "= Benchmarking SU3xSU3  x= x*y"<<std::endl;
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
@@ -83,6 +84,7 @@ int main (int argc, char ** argv)
 
     }
 
+#endif
 
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
   std::cout<<GridLogMessage << "= Benchmarking SU3xSU3  z= x*y"<<std::endl;
@@ -118,6 +120,7 @@ int main (int argc, char ** argv)
 
     }
 
+#if 0
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
   std::cout<<GridLogMessage << "= Benchmarking SU3xSU3  mult(z,x,y)"<<std::endl;
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
@@ -187,6 +190,9 @@ int main (int argc, char ** argv)
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"   \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
 
     }
+
+#endif 
+
 #if 0
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
   std::cout<<GridLogMessage << "= Benchmarking SU3xSU3  CovShiftForward(z,x,y)"<<std::endl;

@@ -230,6 +230,7 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+#pragma omp target teams distribute parallel for 
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
@@ -249,6 +250,7 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+#pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
@@ -267,6 +269,7 @@ public:
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
     auto me  = View();
+#pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
