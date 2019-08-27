@@ -43,6 +43,9 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #define POINTER_CACHE
 #define GRID_ALLOC_ALIGN (2*1024*1024)
 
+#ifdef OMPTARGET
+#include <cuda_runtime_api.h>
+#endif
 NAMESPACE_BEGIN(Grid);
 
 // Move control to configure.ac and Config.h?
@@ -165,7 +168,7 @@ public:
     pointer ptr = nullptr;
 #endif
 
-#ifdef GRID_NVCC
+#ifdef OMPTARGET
     ////////////////////////////////////
     // Unified (managed) memory
     ////////////////////////////////////

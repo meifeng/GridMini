@@ -230,7 +230,7 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
-#pragma omp target teams distribute parallel for 
+#pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);

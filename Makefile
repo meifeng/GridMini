@@ -1,4 +1,4 @@
-GPUARCH=-m64 -gencode arch=compute_60,code=sm_60
+GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
 MAIN=Benchmark_su3
 
 ##PGI
@@ -7,7 +7,7 @@ MAIN=Benchmark_su3
 
 ##Clang
 CXX=clang++
-CXXFLAGS=-std=c++11 -fopenmp -O3 -fopenmp-targets=nvptx64
+CXXFLAGS=-std=c++11 -fopenmp -O3 -fopenmp-targets=nvptx64 -lcudart
 
 ##NVCC
 #CXX=nvcc
@@ -18,7 +18,7 @@ CXXFLAGS=-std=c++11 -fopenmp -O3 -fopenmp-targets=nvptx64
 #CXXFLAGS=-std=c++14 -O3 -fopenmp
 
 
-INCLUDES=-I./ 
+INCLUDES=-I./ -I$(CUDA_ROOT)/include
 LDFLAGS=
 all:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) \
@@ -36,6 +36,6 @@ all:
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_SINGLE \
-                -DRNG_RANLUX \
+                -DRNG_RANLUX  \
 		-DOMPTARGET
 
