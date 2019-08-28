@@ -3,7 +3,7 @@ MAIN=Benchmark_su3
 
 ##PGI
 CXX=pgc++
-CXXFLAGS=-fast --c++14 -acc -ta=tesla:managed,cc60 -Mnollvm -Minfo=accel
+CXXFLAGS=-fast --c++14 -acc -ta=tesla:managed,cc70 -Mnollvm -Minfo=accel
 
 ##Clang
 #CXX=clang++
