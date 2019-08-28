@@ -230,11 +230,27 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+int nthreads=8;
+int nblocks=me.size()/nthreads;
+
+#pragma omp target 
+#pragma omp teams distribute num_teams(nblocks)
+for(int ss=0; ss<nblocks; ss++) {
+#pragma omp parallel for 
+    for(int tt=0; tt<nthreads; tt++) {
+      auto tmp = eval(ss*nthreads+tt,expr);
+      vstream(me[ss*nthreads+tt],tmp);
+    }
+}
+
+
+/*
 #pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
     });
+*/
     return *this;
   }
   template <typename Op, typename T1,typename T2> inline Lattice<vobj> & operator=(const LatticeBinaryExpression<Op,T1,T2> &expr)
@@ -250,11 +266,26 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+
+int nthreads=32;
+int nblocks=me.size()/nthreads;
+
+#pragma omp target 
+#pragma omp teams distribute num_teams(nblocks) thread_limit(nthreads)
+for(int ss=0; ss<nblocks; ss++) {
+#pragma omp parallel for 
+    for(int tt=0; tt<nthreads; tt++) {
+      auto tmp = eval(ss*nthreads+tt,expr);
+      vstream(me[ss*nthreads+tt],tmp);
+    }
+}
+/*
 #pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
     });
+*/
     return *this;
   }
   template <typename Op, typename T1,typename T2,typename T3> inline Lattice<vobj> & operator=(const LatticeTrinaryExpression<Op,T1,T2,T3> &expr)
