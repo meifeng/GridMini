@@ -36,6 +36,6 @@ all:
                 -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
-                -DGRID_DEFAULT_PRECISION_SINGLE \
+                -DGRID_DEFAULT_PRECISION_DOUBLE \
                 -DRNG_RANLUX
 
