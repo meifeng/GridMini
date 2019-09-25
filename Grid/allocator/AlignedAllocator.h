@@ -168,7 +168,7 @@ public:
     pointer ptr = nullptr;
 #endif
 
-#ifdef OMPTARGET
+#if defined (GRID_NVCC) || defined (OMPMANAGED) 
     ////////////////////////////////////
     // Unified (managed) memory
     ////////////////////////////////////
@@ -192,6 +192,11 @@ public:
   #endif
     assert( ptr != (_Tp *)NULL);
 
+//#ifdef OMPTARGET
+//int size_ptr = bytes/sizeof(_Tp);
+//#pragma omp target enter data map(alloc:ptr[0:size_ptr])
+//#endif
+
     //////////////////////////////////////////////////
     // First touch optimise in threaded loop 
     //////////////////////////////////////////////////
@@ -214,7 +219,7 @@ public:
     pointer __freeme = __p;
 #endif
 
-#ifdef GRID_NVCC
+#if defined (GRID_NVCC) || defined (OMPMANAGED)
     if ( __freeme ) cudaFree((void *)__freeme);
 #else 
   #ifdef HAVE_MM_MALLOC_H

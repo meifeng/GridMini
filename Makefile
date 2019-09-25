@@ -1,9 +1,9 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
-MAIN=Benchmark_su3
+MAIN=Benchmark_STREAM
 
 ##xlC
 CXX=xlC_r
-CXXFLAGS=-qsmp=omp -qoffload -Ofast  -std=c++11
+CXXFLAGS=-qsmp=omp -qoffload -Ofast  -std=c++11 -g -DDEBUG -DOMPTARGET -DOMPMANAGED
 
 ##PGI
 #CXX=pgc++
@@ -11,8 +11,8 @@ CXXFLAGS=-qsmp=omp -qoffload -Ofast  -std=c++11
 
 ##Clang
 #CXX=clang++
-#CXXFLAGS=-std=c++11 -v -fopenmp -O3 -fopenmp-targets=nvptx64 -lcudart 
-#	-Xcuda-ptxas -maxregcount=64
+#CXXFLAGS=-std=c++11 -v -fopenmp -O3 -fopenmp-targets=nvptx64 -lcudart -DOMPTARGET -DDEBUG
+	#-Xcuda-ptxas -maxregcount=64
 
 ##NVCC
 #CXX=nvcc
@@ -36,13 +36,12 @@ all:
                 Grid/communicator/Communicator_none.cc  \
                 Grid/log/Log.cc \
                 -o ${MAIN}.x \
-                -DGEN \
+                -DGPU_VEC \
                 -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
-                -DRNG_RANLUX  \
-		-DOMPTARGET
+                -DRNG_RANLUX  
 
 clean:
 	rm -v *.x *.o

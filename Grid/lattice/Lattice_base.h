@@ -60,7 +60,8 @@ void accelerator_inline conformable(GridBase *lhs,GridBase *rhs)
 #define LATTICE_VIEW_STRICT
 template<class vobj> class LatticeAccelerator : public LatticeBase
 {
-protected:
+//protected:
+  public:
   GridBase *_grid;
   int checkerboard;
   vobj     *_odata;    // A managed pointer
@@ -230,27 +231,30 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
-int nthreads=8;
-int nblocks=me.size()/nthreads;
+//int nthreads=8;
+//int nblocks=me.size()/nthreads;
 
-#pragma omp target 
-#pragma omp teams distribute num_teams(nblocks)
-for(int ss=0; ss<nblocks; ss++) {
-#pragma omp parallel for 
-    for(int tt=0; tt<nthreads; tt++) {
-      auto tmp = eval(ss*nthreads+tt,expr);
-      vstream(me[ss*nthreads+tt],tmp);
-    }
-}
+//#pragma omp target teams distribute num_teams(nblocks) 
+//for(int ss=0; ss<nblocks; ss++) {
+//#pragma omp parallel for 
+//    for(int tt=0; tt<nthreads; tt++) {
+//      auto tmp = eval(ss*nthreads+tt,expr);
+//      vstream(me[ss*nthreads+tt],tmp);
+//    }
+//}
 
-
-/*
+int sssize=me.size();
+#ifdef OMPTARGET
 #pragma omp target teams distribute parallel for
-    accelerator_for(ss,me.size(),1,{
-      auto tmp = eval(ss,expr);
-      vstream(me[ss],tmp);
-    });
-*/
+#endif
+for(int ss=0; ss<sssize; ss++) {
+	auto tmp = eval(ss,expr);
+	vstream(me[ss],tmp);
+}
+//    accelerator_for(ss,me.size(),1,{
+//      auto tmp = eval(ss,expr);
+//      vstream(me[ss],tmp);
+//    });
     return *this;
   }
   template <typename Op, typename T1,typename T2> inline Lattice<vobj> & operator=(const LatticeBinaryExpression<Op,T1,T2> &expr)
@@ -267,11 +271,21 @@ for(int ss=0; ss<nblocks; ss++) {
 
     auto me  = View();
 
-int nthreads=32;
+//    auto in1 = expr.arg1.View();
+//    auto in2 = expr.arg2.View();
+    
+//int in_size = in1.size();
+//auto in1_ptr = &in1[0];
+//auto in2_ptr = &in2[0];
+//int me_size = me.size();
+//auto me_ptr = &me[0];
+
+#if 0
+int nthreads=64;
 int nblocks=me.size()/nthreads;
 
-#pragma omp target 
-#pragma omp teams distribute num_teams(nblocks) thread_limit(nthreads)
+//#pragma omp target data use_device_ptr(in1_ptr,in2_ptr,me_ptr)
+#pragma omp target teams distribute num_teams(nblocks) thread_limit(nthreads) 
 for(int ss=0; ss<nblocks; ss++) {
 #pragma omp parallel for 
     for(int tt=0; tt<nthreads; tt++) {
@@ -279,13 +293,28 @@ for(int ss=0; ss<nblocks; ss++) {
       vstream(me[ss*nthreads+tt],tmp);
     }
 }
-/*
-#pragma omp target teams distribute parallel for
-    accelerator_for(ss,me.size(),1,{
-      auto tmp = eval(ss,expr);
-      vstream(me[ss],tmp);
-    });
-*/
+//#pragma omp target update from(me_ptr[0:me_size])
+#endif
+
+#if 1
+int sssize=me.size(); 
+auto expr_ptr=&expr;
+auto me_ptr=&me;
+#ifdef OMPTARGET
+#pragma omp target teams distribute parallel for is_device_ptr(expr_ptr,me_ptr) thread_limit(2)
+#endif
+for(int ss=0; ss<sssize; ss++) {
+	printf("ss = %d, thread_num %d\n", ss, omp_get_thread_num());
+        auto tmp = eval(ss,*expr_ptr);
+ 	printf("expr %llx %llx\n",expr.arg1._odata, expr.arg2._odata);
+	printf("tmp %f\n", tmp._internal._internal._internal.v.v[0].z.x);
+        vstream((*me_ptr)[ss],tmp);
+}
+//    accelerator_for(ss,me.size(),1,{
+//      auto tmp = eval(ss,expr);
+//      vstream(me[ss],tmp);
+//    });
+#endif
     return *this;
   }
   template <typename Op, typename T1,typename T2,typename T3> inline Lattice<vobj> & operator=(const LatticeTrinaryExpression<Op,T1,T2,T3> &expr)
@@ -300,7 +329,6 @@ for(int ss=0; ss<nblocks; ss++) {
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
     auto me  = View();
-#pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
@@ -322,6 +350,7 @@ for(int ss=0; ss<nblocks; ss++) {
     resize(this->_grid->oSites());
 
     *this = expr;
+
   }
   template<class Op,class T1, class T2>
   Lattice(const LatticeBinaryExpression<Op,T1,T2> & expr) {

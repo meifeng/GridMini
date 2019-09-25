@@ -114,6 +114,16 @@ template <typename Op, typename T1, typename T2> accelerator_inline
 auto eval(const uint64_t ss, const LatticeBinaryExpression<Op, T1, T2> &expr)  
   -> decltype(expr.op.func( eval(ss,expr.arg1),eval(ss,expr.arg2)))
 {
+  printf("Binary Eval arg1 arg2: %llx %f %llx %f\n",(unsigned long long) &(expr.arg1._odata[ss]._internal._internal._internal.v.v[0].z.x),
+	expr.arg1._odata[ss]._internal._internal._internal.v.v[0].z.x,
+	(unsigned long long)&(expr.arg2._odata[ss]._internal._internal._internal.v.v[0].z.x),
+	expr.arg2._odata[ss]._internal._internal._internal.v.v[0].z.x);
+  auto eval1 = eval(ss, expr.arg1);
+  auto eval2 = eval(ss, expr.arg2);
+  auto result = expr.op.func(eval1, eval2);
+  printf("eval1 = %f, eval2 = %f, result = %f\n", eval1._internal._internal._internal.v.v[0].z.x,
+	eval2._internal._internal._internal.v.v[0].z.x,
+	result._internal._internal._internal.v.v[0].z.x);
   return expr.op.func( eval(ss,expr.arg1), eval(ss,expr.arg2) );
 }
 ///////////////////////
@@ -239,13 +249,17 @@ GridUnopClass(UnaryExp, exp(a));
 ////////////////////////////////////////////
 // Binary operators
 ////////////////////////////////////////////
-#define GridBinOpClass(name, combination)			\
+#include <iostream>
+#define GridBinOpClass(myname, combination)			\
   template <class left, class right>				\
-  struct name {							\
+  struct myname {							\
     static auto accelerator_inline				\
     func(const left &lhs, const right &rhs)			\
       -> decltype(combination) const				\
     {								\
+       printf("combination: lhs %f at %llx, rhs %f at %llx;\n", \ 
+	 lhs._internal._internal._internal.v.v[0].z.x, &(lhs._internal._internal._internal.v.v[0].z.x), \
+	 rhs._internal._internal._internal.v.v[0].z.x, &(rhs._internal._internal._internal.v.v[0].z.x) );  \
       return combination;					\
     }								\
   };

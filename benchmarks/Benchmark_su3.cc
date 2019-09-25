@@ -104,6 +104,13 @@ int main (int argc, char ** argv)
       LatticeColourMatrix x(&Grid); random(pRNG,x);
       LatticeColourMatrix y(&Grid); random(pRNG,y);
 
+auto x_ptr=&(x.View()[0]);
+auto y_ptr=&(y.View()[0]);
+int size=x.View().size();
+
+
+#pragma omp target update to(x_ptr[0:size])
+#pragma omp target update to(y_ptr[0:size])
       for(int64_t i=0;i<Nwarm;i++){
 	z=x*y;
       }
