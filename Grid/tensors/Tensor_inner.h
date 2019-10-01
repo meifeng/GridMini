@@ -52,6 +52,7 @@ accelerator_inline RealD    innerProductD(const RealF    &l,const RealF    &r){ 
 
 accelerator_inline vComplexD innerProductD(const vComplexD &l,const vComplexD &r){  return innerProduct(l,r); }
 accelerator_inline vRealD    innerProductD(const vRealD    &l,const vRealD    &r){  return innerProduct(l,r); }
+/*
 accelerator_inline vComplexD innerProductD(const vComplexF &l,const vComplexF &r){  
   vComplexD la,lb;
   vComplexD ra,rb;
@@ -66,7 +67,7 @@ accelerator_inline vRealD innerProductD(const vRealF &l,const vRealF &r){
   Optimization::PrecisionChange::StoD(r.v,ra.v,rb.v);
   return innerProduct(la,ra) + innerProduct(lb,rb); 
 }
-
+*/
 template<class l,class r,int N> accelerator_inline
 auto innerProductD (const iVector<l,N>& lhs,const iVector<r,N>& rhs) -> iScalar<decltype(innerProductD(lhs._internal[0],rhs._internal[0]))>
 {

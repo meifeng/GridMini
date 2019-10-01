@@ -39,16 +39,28 @@ NAMESPACE_BEGIN(Grid);
 // Scalar +/- Scalar
 // Vector +/- Vector
 // Matrix +/- Matrix
+
+template<class S,class V> accelerator_inline void add(iScalar<Grid_simd<S, V>> * __restrict__ ret,
+                                                                          const iScalar<Grid_simd<S,V>> * __restrict__ lhs,
+                                                                          const iScalar<Grid_simd<S,V>> * __restrict__ rhs)
+{
+  printf("add: lhs %f rhs %f\n", lhs->_internal.v.v[0].z.x, rhs->_internal.v.v[0].z.x);
+  add(&ret->_internal,&lhs->_internal,&rhs->_internal);
+}
+
+
 template<class vtype,class ltype,class rtype> accelerator_inline void add(iScalar<vtype> * __restrict__ ret,
 									  const iScalar<ltype> * __restrict__ lhs,
 									  const iScalar<rtype> * __restrict__ rhs)
 {
+  printf("add\n");
   add(&ret->_internal,&lhs->_internal,&rhs->_internal);
 }
 template<class vtype,class ltype,class rtype,int N> accelerator_inline void add(iVector<vtype,N> * __restrict__ ret,
 									   const iVector<ltype,N> * __restrict__ lhs,
 									   const iVector<rtype,N> * __restrict__ rhs)
 {
+ printf("add iVector\n");
   for(int c=0;c<N;c++){
     ret->_internal[c]=lhs->_internal[c]+rhs->_internal[c];
   }

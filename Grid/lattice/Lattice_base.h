@@ -307,7 +307,7 @@ for(int ss=0; ss<sssize; ss++) {
 	printf("ss = %d, thread_num %d\n", ss, omp_get_thread_num());
         auto tmp = eval(ss,*expr_ptr);
  	printf("expr %llx %llx\n",expr.arg1._odata, expr.arg2._odata);
-	printf("tmp %f\n", tmp._internal._internal._internal.v.v[0].z.x);
+	//printf("tmp %f\n", tmp._internal._internal._internal.v.v[0].z.x);
         vstream((*me_ptr)[ss],tmp);
 }
 //    accelerator_for(ss,me.size(),1,{

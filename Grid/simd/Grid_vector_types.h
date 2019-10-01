@@ -279,7 +279,9 @@ public:
   friend accelerator_inline void add(Grid_simd *__restrict__ y,
 				     const Grid_simd *__restrict__ l,
 				     const Grid_simd *__restrict__ r) {
-    *y = (*l) + (*r);
+    printf("Grid_simd add l=%f, r=%f\n",(*l).v.v[0].z.x,(*r).v.v[0].z.x);
+    //*y = (*l) + (*r);
+    *y = myadd((*l), (*r));
   }
   friend accelerator_inline void mac(Grid_simd *__restrict__ y,
 				     const Scalar_type *__restrict__ a,
@@ -700,6 +702,15 @@ accelerator_inline void vstream(Grid_simd<S, V> &out, const Grid_simd<S, V> &in)
 template <class S, class V>
 accelerator_inline Grid_simd<S, V> operator+(Grid_simd<S, V> a, Grid_simd<S, V> b) {
   Grid_simd<S, V> ret;
+  printf("Grid_simd old add: a.v=%f, b.v=%f\n",(double)a.v.v[0].z.x, (double)b.v.v[0].z.x);
+  ret.v = binary<V>(a.v, b.v, SumSIMD());
+  return ret;
+};
+
+template <class S, class V>
+accelerator_inline Grid_simd<S, V> myadd(const Grid_simd<S, V> &a, const Grid_simd<S, V> &b) {
+  Grid_simd<S, V> ret;
+  printf("Grid_simd add: a.v=%f, b.v=%f\n",(double)a.v.v[0].z.x, (double)b.v.v[0].z.x);
   ret.v = binary<V>(a.v, b.v, SumSIMD());
   return ret;
 };
