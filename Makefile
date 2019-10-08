@@ -3,7 +3,7 @@ MAIN=Benchmark_STREAM
 
 ##xlC
 CXX=xlC_r
-CXXFLAGS=-qsmp=omp -qoffload -Ofast  -std=c++11 -g -DDEBUG -DOMPTARGET -DOMPMANAGED
+CXXFLAGS=-qsmp=omp -qoffload -Ofast  -std=c++11 -g -DOMPTARGET -DOMPMANAGED #-DDEBUG
 
 ##PGI
 #CXX=pgc++
@@ -11,7 +11,7 @@ CXXFLAGS=-qsmp=omp -qoffload -Ofast  -std=c++11 -g -DDEBUG -DOMPTARGET -DOMPMANA
 
 ##Clang
 #CXX=clang++
-#CXXFLAGS=-std=c++11 -v -fopenmp -O3 -fopenmp-targets=nvptx64 -lcudart -DOMPTARGET -DDEBUG
+#CXXFLAGS=-std=c++11 -v -fopenmp -O3 -fopenmp-targets=nvptx64 -lcudart -DOMPTARGET -DDEBUG -DOMPMANAGED
 	#-Xcuda-ptxas -maxregcount=64
 
 ##NVCC
@@ -36,7 +36,7 @@ all:
                 Grid/communicator/Communicator_none.cc  \
                 Grid/log/Log.cc \
                 -o ${MAIN}.x \
-                -DGPU_VEC \
+                -DGEN \
                 -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \

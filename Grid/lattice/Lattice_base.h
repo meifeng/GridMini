@@ -278,14 +278,11 @@ for(int ss=0; ss<sssize; ss++) {
 //auto in1_ptr = &in1[0];
 //auto in2_ptr = &in2[0];
 //int me_size = me.size();
-//auto me_ptr = &me[0];
 
-#if 0
+#if 1
 int nthreads=64;
 int nblocks=me.size()/nthreads;
-
-//#pragma omp target data use_device_ptr(in1_ptr,in2_ptr,me_ptr)
-#pragma omp target teams distribute num_teams(nblocks) thread_limit(nthreads) 
+#pragma omp target teams distribute num_teams(nblocks) thread_limit(nthreads)
 for(int ss=0; ss<nblocks; ss++) {
 #pragma omp parallel for 
     for(int tt=0; tt<nthreads; tt++) {
@@ -296,7 +293,7 @@ for(int ss=0; ss<nblocks; ss++) {
 //#pragma omp target update from(me_ptr[0:me_size])
 #endif
 
-#if 1
+#if 0
 int sssize=me.size(); 
 auto expr_ptr=&expr;
 auto me_ptr=&me;

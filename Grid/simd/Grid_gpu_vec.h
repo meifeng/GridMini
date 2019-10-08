@@ -49,11 +49,11 @@ public:
   accelerator_inline GpuComplex(const GpuComplex &zz) { z = zz.z;};
   friend accelerator_inline  GpuComplex operator+(const GpuComplex &lhs,const GpuComplex &rhs) { 
     GpuComplex r ; 
-    printf("operator+: (%f at %llx, %f at %llx) (%f at %llx, %f at %llx)\n", lhs.z.x, (unsigned long long)&(lhs.z.x),  lhs.z.y, (unsigned long long)&(lhs.z.y), 
-	rhs.z.x, (unsigned long long)&(rhs.z.x), rhs.z.y, (unsigned long long)&(rhs.z.y));
+    //printf("operator+: (%f at %llx, %f at %llx) (%f at %llx, %f at %llx)\n", lhs.z.x, (unsigned long long)&(lhs.z.x),  lhs.z.y, (unsigned long long)&(lhs.z.y), 
+//	rhs.z.x, (unsigned long long)&(rhs.z.x), rhs.z.y, (unsigned long long)&(rhs.z.y));
     r.z.x = lhs.z.x + rhs.z.x; 
     r.z.y = lhs.z.y + rhs.z.y; 
-    printf("result: (%f at %llx, %f at %llx)\n", r.z.x, (unsigned long long)&(r.z.x), r.z.y, (unsigned long long)&(r.z.y));
+//    printf("result: (%f at %llx, %f at %llx)\n", r.z.x, (unsigned long long)&(r.z.x), r.z.y, (unsigned long long)&(r.z.y));
     return r; 
   }
   friend accelerator_inline GpuComplex operator-(const GpuComplex &lhs,const GpuComplex &rhs) { 
