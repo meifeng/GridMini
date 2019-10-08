@@ -279,9 +279,10 @@ public:
   friend accelerator_inline void add(Grid_simd *__restrict__ y,
 				     const Grid_simd *__restrict__ l,
 				     const Grid_simd *__restrict__ r) {
-//    printf("Grid_simd add l=%f, r=%f\n",(*l).v.v[0].z.x,(*r).v.v[0].z.x);
-    //*y = (*l) + (*r);
-    *y = myadd((*l), (*r));
+    printf("thread %d: Grid_simd add l=%f, r=%f\n",omp_get_thread_num(), (*l).v.v[0].z.x,(*r).v.v[0].z.x);
+
+    *y = (*l) + (*r);
+//    *y = myadd((*l), (*r));
   }
   friend accelerator_inline void mac(Grid_simd *__restrict__ y,
 				     const Scalar_type *__restrict__ a,
@@ -702,7 +703,7 @@ accelerator_inline void vstream(Grid_simd<S, V> &out, const Grid_simd<S, V> &in)
 template <class S, class V>
 accelerator_inline Grid_simd<S, V> operator+(Grid_simd<S, V> a, Grid_simd<S, V> b) {
   Grid_simd<S, V> ret;
-//  printf("Grid_simd old add: a.v=%f, b.v=%f\n",(double)a.v.v[0].z.x, (double)b.v.v[0].z.x);
+  printf("thread %d: Grid_simd old add: a.v=%f, b.v=%f\n",omp_get_thread_num(), (double)a.v.v[0].z.x, (double)b.v.v[0].z.x);
   ret.v = binary<V>(a.v, b.v, SumSIMD());
   return ret;
 };
@@ -710,7 +711,7 @@ accelerator_inline Grid_simd<S, V> operator+(Grid_simd<S, V> a, Grid_simd<S, V> 
 template <class S, class V>
 accelerator_inline Grid_simd<S, V> myadd(const Grid_simd<S, V> &a, const Grid_simd<S, V> &b) {
   Grid_simd<S, V> ret;
-//  printf("Grid_simd add: a.v=%f, b.v=%f\n",(double)a.v.v[0].z.x, (double)b.v.v[0].z.x);
+  printf("Grid_simd myadd: a.v=%f, b.v=%f\n",(double)a.v.v[0].z.x, (double)b.v.v[0].z.x);
   ret.v = binary<V>(a.v, b.v, SumSIMD());
   return ret;
 };

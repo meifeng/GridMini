@@ -279,7 +279,7 @@ for(int ss=0; ss<sssize; ss++) {
 //auto in2_ptr = &in2[0];
 //int me_size = me.size();
 
-#if 1
+#if 0
 int nthreads=64;
 int nblocks=me.size()/nthreads;
 #pragma omp target teams distribute num_teams(nblocks) thread_limit(nthreads)
@@ -293,14 +293,14 @@ for(int ss=0; ss<nblocks; ss++) {
 //#pragma omp target update from(me_ptr[0:me_size])
 #endif
 
-#if 0
+#if 1
 int sssize=me.size(); 
 auto expr_ptr=&expr;
 auto me_ptr=&me;
 #ifdef OMPTARGET
-#pragma omp target teams distribute parallel for is_device_ptr(expr_ptr,me_ptr) thread_limit(2)
+#pragma omp target teams distribute parallel for //is_device_ptr(expr_ptr,me_ptr) thread_limit(2)
 #endif
-for(int ss=0; ss<sssize; ss++) {
+for(int ss=0; ss<2; ss++) {
 	printf("ss = %d, thread_num %d\n", ss, omp_get_thread_num());
         auto tmp = eval(ss,*expr_ptr);
  	printf("expr %llx %llx\n",expr.arg1._odata, expr.arg2._odata);
