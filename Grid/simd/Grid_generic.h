@@ -137,8 +137,9 @@ struct Sub{
   }
 };
 
+#if 1
 struct Mult{
-  // Real
+ // Real
   template <typename T>
   accelerator_inline vec<T> operator()(vec<T> a, vec<T> b){
     vec<T> out;
@@ -147,11 +148,34 @@ struct Mult{
       {
         out.v[i] = a.v[i]*b.v[i];
       }
-      
+     
+#ifdef DEBUG
+  printf("Mult in Grid_generic.h: a.v[0]=%f, b.v[0]=%f, out.v[0]=%f\n",a.v[0],b.v[0],out.v[0]);
+#endif  
     return out;
   }
 };
   
+#endif
+
+struct MyMult{
+ // Real
+  template <typename T>
+  accelerator_inline T operator()(vec<T> a, vec<T> b){
+    vec<T> out;
+
+    VECTOR_FOR(i, W<T>::r, 1)
+      {
+        out.v[i] = a.v[i]*b.v[i];
+      }
+
+#ifdef DEBUG
+  printf("MyMult in Grid_generic.h: a.v[0]=%f, b.v[0]=%f, out.v[0]=%f\n",a.v[0],b.v[0],out.v[0]);
+#endif
+    return out.v[0];
+  }
+};
+
 #define cmul(a, b, c, i)			\
   c[i]   = a[i]*b[i]   - a[i+1]*b[i+1];		\
   c[i+1] = a[i]*b[i+1] + a[i+1]*b[i];

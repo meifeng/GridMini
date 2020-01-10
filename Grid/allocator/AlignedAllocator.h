@@ -168,7 +168,7 @@ public:
     pointer ptr = nullptr;
 #endif
 
-#ifdef OMPTARGET
+#if defined(GRID_NVCC) || defined (OMPTARGET_MANAGED)
     ////////////////////////////////////
     // Unified (managed) memory
     ////////////////////////////////////
@@ -181,6 +181,7 @@ public:
       }
     }
     assert( ptr != (_Tp *)NULL);
+    //cudaMemAdvise ( (void*)ptr, bytes, cudaMemAdviseSetPreferredLocation, 0);
 #else 
     //////////////////////////////////////////////////////////////////////////////////////////
     // 2MB align; could make option probably doesn't need configurability
@@ -192,6 +193,10 @@ public:
   #endif
     assert( ptr != (_Tp *)NULL);
 
+//#ifdef OMPTARGET
+//int size=bytes/sizeof(_Tp);
+//#pragma omp target enter data map(alloc:ptr[0:size])
+//#endif 
     //////////////////////////////////////////////////
     // First touch optimise in threaded loop 
     //////////////////////////////////////////////////
@@ -214,7 +219,7 @@ public:
     pointer __freeme = __p;
 #endif
 
-#ifdef GRID_NVCC
+#if defined(GRID_NVCC) || defined (OMPTARGET_MANAGED)
     if ( __freeme ) cudaFree((void *)__freeme);
 #else 
   #ifdef HAVE_MM_MALLOC_H
@@ -223,6 +228,7 @@ public:
     if ( __freeme ) free((void *)__freeme);
   #endif
 #endif
+//#pragma omp target exit data map(delete:__freeme[0:__n])
   }
 
   // FIXME: hack for the copy constructor, eventually it must be avoided

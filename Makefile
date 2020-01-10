@@ -11,9 +11,8 @@ MAIN=Benchmark_su3
 
 ##Clang
 CXX=clang++
-CXXFLAGS=-std=c++11 -fopenmp -O3 -fopenmp-targets=nvptx64 -lcudart 
-
-#	-Xcuda-ptxas -maxregcount=64
+CXXFLAGS=-std=c++14  -g -fopenmp -O3 -DDEBUG -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED #-DVECTOR_LOOPS
 
 ##NVCC
 #CXX=nvcc
@@ -21,7 +20,7 @@ CXXFLAGS=-std=c++11 -fopenmp -O3 -fopenmp-targets=nvptx64 -lcudart
 
 ##GCC
 #CXX=g++
-#CXXFLAGS=-std=c++14 -O3 -fopenmp
+#CXXFLAGS=-std=c++14 -O3 -fopenmp -foffload=nvptx-none -DOMPTARGET -DOMPTARGET_MANAGED -DDEBUG -lcudart
 
 
 INCLUDES=-I./ -I${CUDA_ROOT}/include
@@ -42,8 +41,7 @@ all:
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
-                -DRNG_RANLUX  \
-		-DOMPTARGET
+		-DRNG_RANLUX
 
 clean:
-	rm -v *.x *.o
+	rm -v *.x 

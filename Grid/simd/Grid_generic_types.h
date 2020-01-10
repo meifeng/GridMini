@@ -26,21 +26,23 @@ Author: Antonin Portelli <antonin.portelli@me.com>
     See the full license in the file "LICENSE" in the top level distribution directory
 *************************************************************************************/
 /*  END LEGAL */
-
 static_assert(GEN_SIMD_WIDTH % 16u == 0, "SIMD vector size is not an integer multiple of 16 bytes");
-
-#undef VECTOR_LOOPS
+//#undef VECTOR_LOOPS
 
 // playing with compiler pragmas
 
 #ifdef VECTOR_LOOPS
-#ifdef __clang__
-#define VECTOR_FOR(i, w, inc)						\
-  _Pragma("clang loop unroll(full) vectorize(enable) interleave(enable) vectorize_width(w)") \
-  for (unsigned int i = 0; i < w; i += inc)
-#elif defined __INTEL_COMPILER
-#define VECTOR_FOR(i, w, inc)			\
-  _Pragma("simd vectorlength(w*8)")		\
+//#ifdef __clang__
+//#define VECTOR_FOR(i, w, inc)						\
+//  _Pragma("clang loop unroll(full) vectorize(enable) interleave(enable) vectorize_width(w)") \
+//  for (unsigned int i = 0; i < w; i += inc)
+//#elif defined __INTEL_COMPILER
+//#define VECTOR_FOR(i, w, inc)			\
+//  _Pragma("simd vectorlength(w*8)")		\
+//  for (unsigned int i = 0; i < w; i += inc)
+#if defined OMPTARGET
+#define VECTOR_FOR(i, w, inc)                   \
+  _Pragma("omp simd") 			\
   for (unsigned int i = 0; i < w; i += inc)
 #else
 #define VECTOR_FOR(i, w, inc)			\
@@ -100,6 +102,7 @@ template <> struct W<uint16_t> {
 template <typename T>
 struct vec {
   alignas(GEN_SIMD_WIDTH) T v[W<T>::r];
+//  unsigned int size=W<T>::r;
 };
 #endif
 

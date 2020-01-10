@@ -230,27 +230,11 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
-int nthreads=8;
-int nblocks=me.size()/nthreads;
-
-#pragma omp target 
-#pragma omp teams distribute num_teams(nblocks)
-for(int ss=0; ss<nblocks; ss++) {
-#pragma omp parallel for 
-    for(int tt=0; tt<nthreads; tt++) {
-      auto tmp = eval(ss*nthreads+tt,expr);
-      vstream(me[ss*nthreads+tt],tmp);
-    }
-}
-
-
-/*
-#pragma omp target teams distribute parallel for
+//#pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
     });
-*/
     return *this;
   }
   template <typename Op, typename T1,typename T2> inline Lattice<vobj> & operator=(const LatticeBinaryExpression<Op,T1,T2> &expr)
@@ -266,26 +250,27 @@ for(int ss=0; ss<nblocks; ss++) {
     this->checkerboard=cb;
 
     auto me  = View();
-
-int nthreads=32;
-int nblocks=me.size()/nthreads;
-
-#pragma omp target 
-#pragma omp teams distribute num_teams(nblocks) thread_limit(nthreads)
-for(int ss=0; ss<nblocks; ss++) {
-#pragma omp parallel for 
-    for(int tt=0; tt<nthreads; tt++) {
-      auto tmp = eval(ss*nthreads+tt,expr);
-      vstream(me[ss*nthreads+tt],tmp);
-    }
-}
+    int size = me.size();
+//    printf("size:%d\n",size);
 /*
-#pragma omp target teams distribute parallel for
-    accelerator_for(ss,me.size(),1,{
-      auto tmp = eval(ss,expr);
-      vstream(me[ss],tmp);
-    });
+    auto in1 = expr.arg1;
+    auto in2 = expr.arg2;
+
+int in_size = in1.size();
+auto in1_ptr = &in1[0];
+auto in2_ptr = &in2[0];
+int me_size = me.size();
+auto me_ptr = &me[0];
 */
+
+//#pragma omp target teams distribute parallel for 
+    accelerator_for(ss,me.size(),1,{
+      me[ss] = eval(ss,expr);
+#ifdef DEBUG  
+    if (ss==0) printf("operator= in lattice/Lattice_base.h: me[ss] = %f\n",me[ss]._internal._internal._internal.v.v[0]); 
+#endif
+      //vstream(me[ss],tmp);
+    });
     return *this;
   }
   template <typename Op, typename T1,typename T2,typename T3> inline Lattice<vobj> & operator=(const LatticeTrinaryExpression<Op,T1,T2,T3> &expr)
@@ -300,7 +285,6 @@ for(int ss=0; ss<nblocks; ss++) {
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
     auto me  = View();
-#pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
@@ -318,10 +302,13 @@ for(int ss=0; ss<nblocks; ss++) {
     CBFromExpression(cb,expr);
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
-
+int gsize = this->_grid->oSites();
     resize(this->_grid->oSites());
-
     *this = expr;
+std::cout<<"1"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1]) 
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"2"<<std::endl;
   }
   template<class Op,class T1, class T2>
   Lattice(const LatticeBinaryExpression<Op,T1,T2> & expr) {
@@ -334,9 +321,14 @@ for(int ss=0; ss<nblocks; ss++) {
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
 
+int gsize = this->_grid->oSites();
     resize(this->_grid->oSites());
 
     *this = expr;
+std::cout<<"3"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1]) 
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"4"<<std::endl;
   }
   template<class Op,class T1, class T2, class T3>
   Lattice(const LatticeTrinaryExpression<Op,T1,T2,T3> & expr) {
@@ -349,9 +341,14 @@ for(int ss=0; ss<nblocks; ss++) {
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
 
+int gsize = this->_grid->oSites();
     resize(this->_grid->oSites());
 
     *this = expr;
+std::cout<<"5"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1]) 
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"6"<<std::endl;
   }
 
   template<class sobj> inline Lattice<vobj> & operator = (const sobj & r){
@@ -359,6 +356,8 @@ for(int ss=0; ss<nblocks; ss++) {
     thread_for(ss,me.size(),{
       me[ss] = r;
     });
+std::cout<<"AA"<<std::endl;
+//#pragma omp target update to(me[0:me.size()])
     return *this;
   }
 
@@ -373,6 +372,12 @@ for(int ss=0; ss<nblocks; ss++) {
     resize(this->_grid->oSites());
     assert((((uint64_t)&this->_odata[0])&0xF) ==0);
     this->checkerboard=0;
+int gsize=this->_grid->oSites();
+//std::cout<<"7"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1])
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+//std::cout<<"8"<<std::endl;
+
   }
   
   //  virtual ~Lattice(void) = default;
@@ -392,6 +397,12 @@ for(int ss=0; ss<nblocks; ss++) {
     this->_grid = r.Grid();
     resize(this->_grid->oSites());
     *this = r;
+
+int gsize=this->_grid->oSites();
+std::cout<<"9"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1])
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"10"<<std::endl;
   }
   ///////////////////////////////////////////
   // move constructor
@@ -416,6 +427,7 @@ for(int ss=0; ss<nblocks; ss++) {
     accelerator_for(ss,me.size(),vobj::Nsimd(),{
       coalescedWrite(me[ss],him(ss));
     });
+std::cout<<"BB"<<std::endl;
     return *this;
   }
 
@@ -430,6 +442,7 @@ for(int ss=0; ss<nblocks; ss++) {
     accelerator_for(ss,me.size(),vobj::Nsimd(),{
       coalescedWrite(me[ss],him(ss));
     });
+std::cout<<"CC"<<std::endl;
     return *this;
   }
   ///////////////////////////////////////////
@@ -445,7 +458,8 @@ for(int ss=0; ss<nblocks; ss++) {
 
     r._odata      = nullptr;
     r._odata_size = 0;
-    
+std::cout<<"DD"<<std::endl;
+
     return *this;
   }
 
