@@ -20,7 +20,12 @@
     See the full license in the file "LICENSE" in the top level distribution directory
     *************************************************************************************/
     /*  END LEGAL */
-#include <Grid/Grid.h>
+#include <Grid/GridCore.h>
+#include <Grid/GridStd.h>
+#include <Grid/qcd/QCD.h>
+#include <Grid/qcd/spin/Spin.h>
+#include <Grid/qcd/action/Action.h>
+
 #ifdef GRID_NVCC
 #define CUDA_PROFILE
 #endif

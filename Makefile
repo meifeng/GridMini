@@ -1,5 +1,5 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
-MAIN=Benchmark_su3
+MAIN=Benchmark_dwf
 
 ##PGI
 #CXX=pgc++
@@ -10,12 +10,12 @@ MAIN=Benchmark_su3
 #CXXFLAGS=-std=c++14 -fopenmp -O3
 
 ##NVCC
-CXX=nvcc
-CXXFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
+#CXX=nvcc
+#CXXFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
 
 ##GCC
-#CXX=g++
-#CXXFLAGS=-std=c++14 -O3 -fopenmp
+CXX=g++
+CXXFLAGS=-std=c++14 -O3 -fopenmp
 
 
 INCLUDES=./

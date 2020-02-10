@@ -14,7 +14,7 @@
 
 // All-to-all contraction kernels that touch the 
 // internal lattice structure
-#include <Grid/qcd/utils/A2Autils.h>
+//#include <Grid/qcd/utils/A2Autils.h>
 
 
 
