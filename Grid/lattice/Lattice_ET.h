@@ -120,7 +120,7 @@ auto eval(const uint64_t ss, const LatticeBinaryExpression<Op, T1, T2> &expr)
   auto tmp=expr.op.func( eval(ss,expr.arg1), eval(ss,expr.arg2) );
   printf("eval in lattice/Lattice_ET.h: eval= %f\n",tmp._internal._internal._internal.v.v[0]);
 #endif
-  return tmp;//expr.op.func( eval(ss,expr.arg1), eval(ss,expr.arg2) );
+  return expr.op.func( eval(ss,expr.arg1), eval(ss,expr.arg2) );
 }
 ///////////////////////
 // eval three operands
