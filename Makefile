@@ -1,5 +1,5 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
-MAIN=Benchmark_su3
+MAIN=Benchmark_REAL
 
 ##xlC
 #CXX=xlC_r
@@ -11,8 +11,10 @@ MAIN=Benchmark_su3
 
 ##Clang
 CXX=clang++
-CXXFLAGS=-std=c++14  -g -fopenmp -O3 -DDEBUG -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
-CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED #-DVECTOR_LOOPS
+CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
+#CXXFLAGS += -DVECTOR_LOOPS
+#CXXFLAGS += -DDEBUG
 
 ##NVCC
 #CXX=nvcc
