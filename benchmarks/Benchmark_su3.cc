@@ -35,8 +35,8 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (2)
-#define LMIN (2)
+#define LMAX (32)
+#define LMIN (4)
 #define LADD (4)
   int64_t Nwarm=50;
   int64_t Nloop=1000;
@@ -92,6 +92,10 @@ int main (int argc, char ** argv)
   std::cout<<GridLogMessage << "  L  "<<"\t\t"<<"bytes"<<"\t\t\t"<<"GB/s\t\t GFlop/s"<<std::endl;
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
 
+#ifndef DEBUG
+#define DEBUG
+#endif
+
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){
 
       Coordinate latt_size  ({lat*mpi_layout[0],lat*mpi_layout[1],lat*mpi_layout[2],lat*mpi_layout[3]});
@@ -100,12 +104,12 @@ int main (int argc, char ** argv)
       GridCartesian     Grid(latt_size,simd_layout,mpi_layout);
       GridParallelRNG          pRNG(&Grid);      pRNG.SeedFixedIntegers(std::vector<int>({45,12,81,9}));
 
-      LatticeReal z(&Grid); random(pRNG,z);
-      LatticeReal x(&Grid); random(pRNG,x);
-      LatticeReal y(&Grid); random(pRNG,y);
+      LatticeColourMatrix z(&Grid); random(pRNG,z);
+      LatticeColourMatrix x(&Grid); random(pRNG,x);
+      LatticeColourMatrix y(&Grid); random(pRNG,y);
 
 #ifdef DEBUG
-      LatticeReal zref(&Grid); 
+      LatticeColourMatrix zref(&Grid); 
       auto xv=x.View();
       auto yv=y.View();
       auto zv=z.View();
@@ -133,8 +137,8 @@ int main (int argc, char ** argv)
        //dv[s]=zv[s]-zref_v[s];
        std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
        std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
-       std::cout<<"s="<<s<<" z[]="<<zv[s]<<std::endl;
-       std::cout<<"s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
+       std::cout<<"GOT: s="<<s<<" z[]="<<zv[s]<<std::endl;
+       std::cout<<"EXPECTED: s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
 
      }
 
