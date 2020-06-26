@@ -1,5 +1,6 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
-MAIN=Benchmark_REAL
+#MAIN=Benchmark_REAL
+MAIN=Benchmark_su3
 
 ##xlC
 #CXX=xlC_r
@@ -10,9 +11,9 @@ MAIN=Benchmark_REAL
 #CXXFLAGS=-fast --c++14 -mp -Mllvm -Minfo=accel
 
 ##Clang
-CXX=clang++
-CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
-CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
+#CXX=clang++
+#CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+#CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXXFLAGS += -DVECTOR_LOOPS
 #CXXFLAGS += -DDEBUG
 
@@ -24,6 +25,11 @@ CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXX=g++
 #CXXFLAGS=-std=c++14 -O3 -fopenmp -foffload=nvptx-none -DOMPTARGET -DOMPTARGET_MANAGED -DDEBUG -lcudart
 
+##CRAY CCE
+CXX=CC
+CXXFLAGS=-std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
+#CXXFLAGS += -DDEBUG
 
 INCLUDES=-I./ -I${CUDA_ROOT}/include
 LDFLAGS=-L${CUDA_ROOT}/lib64
@@ -44,6 +50,7 @@ all:
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
 		-DRNG_RANLUX
+
 
 clean:
 	rm -v *.x 
