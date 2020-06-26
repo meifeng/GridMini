@@ -246,6 +246,9 @@ public:
 
   accelerator_inline Grid_simd &operator=(const Grid_simd &&rhs) {
     v = rhs.v;
+ #ifdef DEBUG
+    //printf("operator= in simd/Grid_vector_types.h: rhs.v.v[0]=%e, v.v[0]=%e\n",rhs.v,v);
+ #endif
     return *this;
   };
   accelerator_inline Grid_simd &operator=(const Grid_simd &rhs) {
