@@ -35,7 +35,7 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (32)
+#define LMAX (4)
 #define LMIN (4)
 #define LADD (4)
   int64_t Nwarm=50;
