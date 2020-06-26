@@ -5,7 +5,7 @@ test-float & test-template WRONG
 test-float-pointer CORRECT
 test-float-class   WRONG
 
-CCE 9.0 Tests
+CCE 9.0 Tests All CORRECT
 ----------------------------------------
 gcc/7.3.0
 cudatoolkit/10.0.130_3.22-7.0.0.1_3.3__gdfb4ce5
