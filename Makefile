@@ -11,9 +11,9 @@ MAIN=Benchmark_su3
 #CXXFLAGS=-fast --c++14 -mp -Mllvm -Minfo=accel
 
 ##Clang
-#CXX=clang++
-#CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
-#CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
+CXX=clang++
+CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXXFLAGS += -DVECTOR_LOOPS
 #CXXFLAGS += -DDEBUG
 
@@ -26,9 +26,9 @@ MAIN=Benchmark_su3
 #CXXFLAGS=-std=c++14 -O3 -fopenmp -foffload=nvptx-none -DOMPTARGET -DOMPTARGET_MANAGED -DDEBUG -lcudart
 
 ##CRAY CCE
-CXX=CC
-CXXFLAGS=-std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
-CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
+#CXX=CC
+#CXXFLAGS=-std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
+#CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXXFLAGS += -DDEBUG
 
 INCLUDES=-I./ -I${CUDA_ROOT}/include
