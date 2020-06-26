@@ -11,9 +11,13 @@ MAIN=Benchmark_su3
 #CXXFLAGS=-fast --c++14 -mp -Mllvm -Minfo=accel
 
 ##Clang
-CXX=clang++
-CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+#CXX=clang++
+CXX=/raid/data/lli/software/llvm/bin/clang++
+CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lcudart -Xopenmp-target -march=sm_70
 CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
+#CXXFLAGS += -c -S -emit-llvm -mllvm -disable-llvm-optzns
+CXXFLAGS += -O0 -mllvm -disable-llvm-optzns
+#CXXFLAGS += -O3
 #CXXFLAGS += -DVECTOR_LOOPS
 #CXXFLAGS += -DDEBUG
 
@@ -31,7 +35,8 @@ CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXXFLAGS += -DDEBUG
 
-INCLUDES=-I./ -I${CUDA_ROOT}/include
+CUDA_ROOT=/usr/local/cuda-10.0
+INCLUDES=-I./ -I${CUDA_ROOT}/include -I/home/lld/software/openssl-1.1.1g/include
 LDFLAGS=-L${CUDA_ROOT}/lib64
 all:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) \
@@ -43,12 +48,12 @@ all:
                 Grid/communicator/Communicator_base.cc \
                 Grid/communicator/Communicator_none.cc  \
                 Grid/log/Log.cc \
-                -o ${MAIN}.x \
                 -DGEN \
                 -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
+                -o ${MAIN}.x \
 		-DRNG_RANLUX
 
 
