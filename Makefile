@@ -1,6 +1,6 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
-#MAIN=Benchmark_REAL
-MAIN=Benchmark_su3
+MAIN=Benchmark_REAL
+#MAIN=Benchmark_su3
 
 ##xlC
 #CXX=xlC_r
@@ -11,13 +11,9 @@ MAIN=Benchmark_su3
 #CXXFLAGS=-fast --c++14 -mp -Mllvm -Minfo=accel
 
 ##Clang
-#CXX=clang++
-CXX=/raid/data/lli/software/llvm/bin/clang++
-CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lcudart -Xopenmp-target -march=sm_70
+CXX=clang++
+CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
 CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
-#CXXFLAGS += -c -S -emit-llvm -mllvm -disable-llvm-optzns
-CXXFLAGS += -O0 -mllvm -disable-llvm-optzns
-#CXXFLAGS += -O3
 #CXXFLAGS += -DVECTOR_LOOPS
 #CXXFLAGS += -DDEBUG
 
@@ -35,8 +31,7 @@ CXXFLAGS += -O0 -mllvm -disable-llvm-optzns
 #CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXXFLAGS += -DDEBUG
 
-CUDA_ROOT=/usr/local/cuda-10.0
-INCLUDES=-I./ -I${CUDA_ROOT}/include -I/home/lld/software/openssl-1.1.1g/include
+INCLUDES=-I./ -I${CUDA_ROOT}/include
 LDFLAGS=-L${CUDA_ROOT}/lib64
 all:
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) \
@@ -48,12 +43,12 @@ all:
                 Grid/communicator/Communicator_base.cc \
                 Grid/communicator/Communicator_none.cc  \
                 Grid/log/Log.cc \
+                -o ${MAIN}.x \
                 -DGEN \
                 -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
-                -o ${MAIN}.x \
 		-DRNG_RANLUX
 
 
