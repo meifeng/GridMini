@@ -18,20 +18,21 @@ CXX=g++
 CXXFLAGS=-std=c++14 -O3 -fopenmp
 
 
+SRCS=Grid/util/Init.cc \
+     Grid/communicator/SharedMemory.cc \
+     Grid/communicator/SharedMemoryNone.cc \
+     Grid/allocator/AlignedAllocator.cc \
+     Grid/communicator/Communicator_base.cc \
+     Grid/communicator/Communicator_none.cc  \
+     Grid/log/Log.cc 
 INCLUDES=./
 
 
 all:
 	$(CXX) $(CXXFLAGS) -I$(INCLUDES) \
 		benchmarks/${MAIN}.cc \
-                Grid/util/Init.cc \
-                Grid/communicator/SharedMemory.cc \
-                Grid/communicator/SharedMemoryNone.cc \
-                Grid/allocator/AlignedAllocator.cc \
-                Grid/communicator/Communicator_base.cc \
-                Grid/communicator/Communicator_none.cc  \
-                Grid/log/Log.cc \
-                -o ${MAIN}.x \
+                $(SRCS) \
+		-o ${MAIN}.x \
                 -DGEN \
                 -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
