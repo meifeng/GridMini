@@ -8,4 +8,14 @@
 #SBATCH --gres=gpu:4
 #SBATCH --exclusive
 
+echo "==============================="
+echo "Running OpenMP offloading benchmark"
+echo "==============================="
+cat Makefile 
 srun ./Benchmark_su3.x
+
+echo "==============================="
+echo "Running reference CUDA benchmark"
+echo "==============================="
+cat Makefile.nvcc
+srun ./Benchmark_su3.nvcc.x
