@@ -1,6 +1,6 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
-MAIN=Benchmark_REAL
-#MAIN=Benchmark_su3
+#MAIN=Benchmark_REAL
+MAIN=Benchmark_su3
 
 ##xlC
 #CXX=xlC_r

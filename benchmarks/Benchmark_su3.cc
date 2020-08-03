@@ -35,7 +35,7 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (4)
+#define LMAX (48)
 #define LMIN (4)
 #define LADD (4)
   int64_t Nwarm=50;
@@ -93,7 +93,7 @@ int main (int argc, char ** argv)
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
 
 #ifndef DEBUG
-#define DEBUG
+//#define DEBUG
 #endif
 
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){
