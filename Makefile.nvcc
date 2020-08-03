@@ -31,8 +31,8 @@ all:
                 Grid/communicator/Communicator_none.cc  \
                 Grid/log/Log.cc \
                 -o ${MAIN}.nvcc.x \
-                -DGPU_VEC \
-                -DGEN_SIMD_WIDTH=256 \
+                -DGEN \
+                -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
