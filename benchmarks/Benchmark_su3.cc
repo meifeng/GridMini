@@ -38,8 +38,8 @@ int main (int argc, char ** argv)
 #define LMAX (32)
 #define LMIN (32)
 #define LADD (4)
-  int64_t Nwarm=50;
-  int64_t Nloop=1000;
+  int64_t Nwarm=0;
+  int64_t Nloop=100;
  
   Coordinate simd_layout = GridDefaultSimd(Nd,vComplex::Nsimd());
   std::cout<<GridLogMessage << "Grid simd_layout" << simd_layout << std::endl;
@@ -93,7 +93,7 @@ int main (int argc, char ** argv)
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
 
 #ifndef DEBUG
-//#define DEBUG
+#define DEBUG
 #endif
 
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){
@@ -128,7 +128,21 @@ int main (int argc, char ** argv)
       
       printf("=====Beginning GPU calculations=====\n");
       //expression template calculation if enabled
-      z=x*y;
+      double start=usecond();
+
+      for(int64_t i=0;i<Nloop;i++){
+      #pragma omp target teams distribute parallel for
+	for(int64_t s=0;s<vol;s++){
+          zv[s]=xv[s]*yv[s];
+        }
+      }
+
+      double stop=usecond();
+      double time = (stop-start)/Nloop*1000.0;
+
+      double bytes=3*vol*Nc*Nc*sizeof(Complex);
+      double flops=Nc*Nc*(6+8+8)*vol;
+      std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
 
       printf("=====End GPU calculations=====\n");
      //LatticeReal diff(&Grid);

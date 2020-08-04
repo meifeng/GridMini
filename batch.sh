@@ -12,9 +12,3 @@ echo "Running OpenMP offloading benchmark"
 echo "==============================="
 cat Makefile 
 srun -n 1 ./Benchmark_su3.x
-
-echo "==============================="
-echo "Running reference CUDA benchmark"
-echo "==============================="
-cat Makefile.nvcc
-srun -n 1 ./Benchmark_su3.nvcc.x
