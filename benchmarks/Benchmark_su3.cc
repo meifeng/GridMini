@@ -35,11 +35,11 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (32)
-#define LMIN (32)
+#define LMAX (64)
+#define LMIN (4)
 #define LADD (4)
-  int64_t Nwarm=0;
-  int64_t Nloop=100;
+  int64_t Nwarm=50;
+  int64_t Nloop=1000;
  
   Coordinate simd_layout = GridDefaultSimd(Nd,vComplex::Nsimd());
   std::cout<<GridLogMessage << "Grid simd_layout" << simd_layout << std::endl;
@@ -93,7 +93,7 @@ int main (int argc, char ** argv)
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
 
 #ifndef DEBUG
-#define DEBUG
+//#define DEBUG
 #endif
 
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){

@@ -4,14 +4,16 @@
 #SBATCH -A m2845
 #SBATCH -C gpu
 #SBATCH -N 1
-#SBATCH -t 00:30:00
+#SBATCH -t 2:00:00
 #SBATCH --gres=gpu:1
 
 echo "==============================="
 echo "Running OpenMP offloading benchmark"
 echo "==============================="
 cat Makefile
-srun -n1 ./Benchmark_su3.x
+srun -n1 ./Benchmark_su3.x --gpu-threads 8
+srun -n1 ./Benchmark_su3.x --gpu-threads 32 
+srun -n1 ./Benchmark_su3.x --gpu-threads 128
 #srun -n1 nvprof --print-gpu-trace ./Benchmark_su3.x
 
 echo "==============================="
@@ -19,8 +21,9 @@ echo "Running reference CUDA benchmark"
 echo "==============================="
 cat Makefile.nvcc
 
-#srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 8
+srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 8
 srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 32
+srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 128
 
 #srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 64
 #srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 128
