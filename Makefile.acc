@@ -7,14 +7,13 @@ MAIN=Benchmark_su3
 #CXXFLAGS=-qsmp=omp -qoffload -Ofast  -std=c++11
 
 ##PGI
-#CXX=pgc++
-#CXXFLAGS=-fast --c++14 -acc -Mnollvm -Minfo=accel -ta=tesla:cc70,managed -Mlarge_arrays --no_exceptions
+CXX=pgc++
+CXXFLAGS=-fast --c++14 -acc -Mllvm -Minfo=accel -ta=tesla:cc70,managed -Mlarge_arrays --no_exceptions
 
 ##Clang
-CXX=clang++
-CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
-CXXFLAGS += -DOMPTARGET 
-CXXFLAGS +=-DOMPTARGET_MANAGED
+#CXX=clang++
+#CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+#CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 #CXXFLAGS += -DVECTOR_LOOPS
 #CXXFLAGS += -DDEBUG
 
@@ -44,7 +43,7 @@ all:
                 Grid/communicator/Communicator_base.cc \
                 Grid/communicator/Communicator_none.cc  \
                 Grid/log/Log.cc \
-                -o ${MAIN}.x \
+                -o ${MAIN}.acc.x \
                 -DGEN \
                 -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \

@@ -193,9 +193,12 @@ public:
   #endif
     assert( ptr != (_Tp *)NULL);
 
+//FIXME: NOT WORKING
 //#ifdef OMPTARGET
-//int size=bytes/sizeof(_Tp);
-//#pragma omp target enter data map(alloc:ptr[0:size])
+//#pragma omp target enter data map(alloc:ptr[0:__n])
+//for(int n=0;n<__n;n++){
+//#pragma omp target enter data map(alloc:ptr[n][0:sizeof(_Tp)])
+//}
 //#endif 
     //////////////////////////////////////////////////
     // First touch optimise in threaded loop 
@@ -227,8 +230,14 @@ public:
   #else
     if ( __freeme ) free((void *)__freeme);
   #endif
-#endif
+
+//FIXME: NOT WORKING
+//for(int n=0;n<__n;n++){
+//#pragma omp target exit data map(delete:__freeme[n][0:sizeof(_Tp)])
+//}    
 //#pragma omp target exit data map(delete:__freeme[0:__n])
+
+#endif
   }
 
   // FIXME: hack for the copy constructor, eventually it must be avoided
