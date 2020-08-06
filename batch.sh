@@ -12,18 +12,18 @@ echo "Running OpenMP offloading benchmark"
 echo "==============================="
 cat Makefile
 srun -n1 ./Benchmark_su3.x --gpu-threads 8
-srun -n1 ./Benchmark_su3.x --gpu-threads 32 
+srun -n1 ./Benchmark_su3.x --gpu-threads 32
 srun -n1 ./Benchmark_su3.x --gpu-threads 128
 #srun -n1 nvprof --print-gpu-trace ./Benchmark_su3.x
 
-echo "==============================="
-echo "Running reference CUDA benchmark"
-echo "==============================="
-cat Makefile.nvcc
+#echo "==============================="
+#echo "Running reference CUDA benchmark"
+#echo "==============================="
+#cat Makefile.nvcc
 
-srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 8
-srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 32
-srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 128
+#srun -n1 nvprof ./Benchmark_su3.nvcc.x -o nvcc-8threads.nvp --gpu-threads 8
+#srun -n1 nvprof ./Benchmark_su3.nvcc.x -o nvcc-32threads.nvp --gpu-threads 32
+#srun -n1 nvprof ./Benchmark_su3.nvcc.x -o nvcc-128threads.nvp --gpu-threads 128
 
 #srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 64
 #srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 128
