@@ -129,9 +129,16 @@ void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
 
 #define accelerator 
 #define accelerator_inline strong_inline
-#define accelerator_for(iterator,num,nsimd, ... )   _Pragma("omp target teams distribute parallel for") naked_for(iterator, num, { __VA_ARGS__ });
-#define accelerator_forNB(iterator,num,nsimd, ... ) _Pragma("omp target teams distribute parallel for") naked_for(iterator, num, { __VA_ARGS__ });
+#define accelerator_for(iterator,num,nsimd, ... )   _Pragma("omp target teams distribute parallel for thread_limit(32)") naked_for(iterator, num, { __VA_ARGS__ });
+#define accelerator_forNB(iterator,num,nsimd, ... ) _Pragma("omp target teams distribute parallel for thread_limit(32)") naked_for(iterator, num, { __VA_ARGS__ });
 #define accelerator_barrier(dummy) 
+
+#elif defined (_OPENACC)
+
+#define accelerator
+#define accelerator_inline strong_inline
+#define accelerator_for(iterator,num,nsimd, ... )   _Pragma("acc parallel loop independent") naked_for(iterator, num, { __VA_ARGS__ });
+#define accelerator_forNB(iterator,num,nsimd, ... ) _Pragma("acc parallel loop independent") naked_for(iterator, num, { __VA_ARGS__ });
 
 #else
 
