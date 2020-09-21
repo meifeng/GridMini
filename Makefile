@@ -13,6 +13,8 @@ MAIN=Benchmark_su3
 
 ##Clang
 CXX=clang++
+#CXXFLAGS=-std=c++14 -g -fopenmp  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+#CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-version=51 -Rpass=openmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
 CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
 CXXFLAGS += -DOMPTARGET 
 CXXFLAGS +=-DOMPTARGET_MANAGED
