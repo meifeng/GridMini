@@ -35,8 +35,8 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (64)
-#define LMIN (4)
+#define LMAX (32)
+#define LMIN (32)
 #define LADD (4)
   int64_t Nwarm=50;
   int64_t Nloop=1000;
@@ -131,10 +131,11 @@ int main (int argc, char ** argv)
       double start=usecond();
 
       for(int64_t i=0;i<Nloop;i++){
-      #pragma omp target teams distribute parallel for
-	for(int64_t s=0;s<vol;s++){
-          zv[s]=xv[s]*yv[s];
-        }
+//      #pragma omp target teams distribute parallel for
+//	for(int64_t s=0;s<vol;s++){
+//          zv[s]=xv[s]*yv[s];
+//        }
+	z=x*y;
       }
 
       double stop=usecond();
