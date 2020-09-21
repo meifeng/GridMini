@@ -43,7 +43,7 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #define POINTER_CACHE
 #define GRID_ALLOC_ALIGN (2*1024*1024)
 
-#ifdef OMPTARGET
+#ifdef OMPTARGET_MANAGED
 #include <cuda_runtime_api.h>
 #endif
 NAMESPACE_BEGIN(Grid);
