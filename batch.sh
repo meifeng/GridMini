@@ -5,27 +5,29 @@
 #SBATCH -C gpu
 #SBATCH -N 1
 #SBATCH -t 2:00:00
+#SBATCH -J GridMini
+#SBATCH -o Benchmark_REAL.out
 #SBATCH --gres=gpu:1
 
 echo "==============================="
 echo "Running OpenMP offloading benchmark"
 echo "==============================="
 cat Makefile
-srun -n1 ./Benchmark_su3.x --gpu-threads 8
-srun -n1 ./Benchmark_su3.x --gpu-threads 32
-srun -n1 ./Benchmark_su3.x --gpu-threads 128
+srun -n1 ./Benchmark_REAL.x --gpu-threads 8
+srun -n1 ./Benchmark_REAL.x --gpu-threads 16
+srun -n1 ./Benchmark_REAL.x --gpu-threads 32
+srun -n1 ./Benchmark_REAL.x --gpu-threads 128
 #srun -n1 nvprof --print-gpu-trace ./Benchmark_su3.x
 
-#echo "==============================="
-#echo "Running reference CUDA benchmark"
-#echo "==============================="
-#cat Makefile.nvcc
+echo "==============================="
+echo "Running reference CUDA benchmark"
+echo "==============================="
+cat Makefile.nvcc
 
-#srun -n1 nvprof ./Benchmark_su3.nvcc.x -o nvcc-8threads.nvp --gpu-threads 8
-#srun -n1 nvprof ./Benchmark_su3.nvcc.x -o nvcc-32threads.nvp --gpu-threads 32
-#srun -n1 nvprof ./Benchmark_su3.nvcc.x -o nvcc-128threads.nvp --gpu-threads 128
-
-#srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 64
-#srun -n1 ./Benchmark_su3.nvcc.x --gpu-threads 128
+srun -n1 ./Benchmark_REAL.nvcc.x --gpu-threads 8
+srun -n1 ./Benchmark_REAL.nvcc.x --gpu-threads 32
+srun -n1 ./Benchmark_REAL.nvcc.x --gpu-threads 64
+srun -n1 ./Benchmark_REAL.nvcc.x --gpu-threads 128
+srun -n1 ./Benchmark_REAL.nvcc.x --gpu-threads 256
 #srun -n1 nvprof --print-gpu-trace ./Benchmark_su3.nvcc.x
 #srun -n 1 nv-nsight-cu-cli -o omp-cuda-mode ./Benchmark_su3.x
