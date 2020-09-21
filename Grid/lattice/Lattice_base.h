@@ -251,6 +251,8 @@ public:
 
     auto me  = View();
     int size = me.size();
+    int nthreads = GEN_SIMD_WIDTH/16u;
+    int nblocks = (size+nthreads-1)/nthreads;
 //    printf("size:%d\n",size);
 /*
     auto in1 = expr.arg1;
@@ -263,14 +265,21 @@ int me_size = me.size();
 auto me_ptr = &me[0];
 */
 
-//#pragma omp target teams distribute parallel for 
-    accelerator_for(ss,me.size(),1,{
-      me[ss] = eval(ss,expr);
+#pragma omp target 
+#pragma omp teams distribute num_teams(nblocks) thread_limit(nthreads) 
+//    accelerator_for(ss,me.size(),1,{
+  for(int ss=0; ss<nblocks; ss++) {
+#pragma omp parallel for //firstprivate(ss) 
+    for(int tt=0; tt<nthreads; tt++) {
+      int i=ss*nthreads+tt;
+      me[i] = eval(i,expr);
 #ifdef DEBUG  
     if (ss==0) printf("operator= in lattice/Lattice_base.h: me[ss] = %f\n",me[ss]._internal._internal._internal.v.v[0]); 
 #endif
-      //vstream(me[ss],tmp);
-    });
+     //vstream(me[ss],tmp);
+     }
+   }
+//    });
     return *this;
   }
   template <typename Op, typename T1,typename T2,typename T3> inline Lattice<vobj> & operator=(const LatticeTrinaryExpression<Op,T1,T2,T3> &expr)
