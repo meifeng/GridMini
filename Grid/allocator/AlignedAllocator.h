@@ -43,7 +43,7 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #define POINTER_CACHE
 #define GRID_ALLOC_ALIGN (2*1024*1024)
 
-#ifdef OMPTARGET
+#ifdef OMPTARGET_MANAGED
 #include <cuda_runtime_api.h>
 #endif
 NAMESPACE_BEGIN(Grid);
@@ -182,6 +182,10 @@ public:
     }
     assert( ptr != (_Tp *)NULL);
     //cudaMemAdvise ( (void*)ptr, bytes, cudaMemAdviseSetPreferredLocation, 0);
+#elif defined (OMPTARGET_UVM)
+    std::cout <<"OMPTARGET_UVM"<<std::endl;
+    const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
+    if ( ptr == (_Tp *) NULL ) ptr = (_Tp *) omp_target_alloc_shared(bytes, device_id);
 #else 
     //////////////////////////////////////////////////////////////////////////////////////////
     // 2MB align; could make option probably doesn't need configurability
@@ -224,6 +228,11 @@ public:
 
 #if defined(GRID_NVCC) || defined (OMPTARGET_MANAGED)
     if ( __freeme ) cudaFree((void *)__freeme);
+
+#elif defined (OMPTARGET_UVM) 
+    const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
+    omp_target_free(__freeme, device_id );
+
 #else 
   #ifdef HAVE_MM_MALLOC_H
     if ( __freeme ) _mm_free((void *)__freeme); 

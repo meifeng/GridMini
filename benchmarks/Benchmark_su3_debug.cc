@@ -35,8 +35,8 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (4)
-#define LMIN (4)
+#define LMAX (2)
+#define LMIN (2)
 #define LADD (4)
   int64_t Nwarm=50;
   int64_t Nloop=1000;
@@ -91,11 +91,9 @@ int main (int argc, char ** argv)
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
   std::cout<<GridLogMessage << "  L  "<<"\t\t"<<"bytes"<<"\t\t\t"<<"GB/s\t\t GFlop/s"<<std::endl;
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
-
 #ifndef DEBUG
 #define DEBUG
 #endif
-
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){
 
       Coordinate latt_size  ({lat*mpi_layout[0],lat*mpi_layout[1],lat*mpi_layout[2],lat*mpi_layout[3]});
@@ -104,9 +102,9 @@ int main (int argc, char ** argv)
       GridCartesian     Grid(latt_size,simd_layout,mpi_layout);
       GridParallelRNG          pRNG(&Grid);      pRNG.SeedFixedIntegers(std::vector<int>({45,12,81,9}));
 
-      LatticeColourMatrix z(&Grid); random(pRNG,z);
-      LatticeColourMatrix x(&Grid); random(pRNG,x);
-      LatticeColourMatrix y(&Grid); random(pRNG,y);
+      LatticeColourMatrix z(&Grid); z=6.0;
+      LatticeColourMatrix x(&Grid); x=1.0;
+      LatticeColourMatrix y(&Grid); y=2.0;
 
 #ifdef DEBUG
       LatticeColourMatrix zref(&Grid); 
@@ -128,24 +126,23 @@ int main (int argc, char ** argv)
       
       printf("=====Beginning GPU calculations=====\n");
       //expression template calculation if enabled
-      double start=usecond();
 
-      for(int64_t i=0;i<Nloop;i++){
+      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()])	
+      #pragma omp target update     to(zv._odata[:zv.size()])
+      #pragma omp target enter data map(alloc:xv._odata[ :xv.size()])
+      #pragma omp target update     to(xv._odata[:xv.size()])
+      #pragma omp target enter data map(alloc:yv._odata[ :yv.size()])
+      #pragma omp target update     to(yv._odata[:yv.size()])
+
+//      z=x*y;
       #pragma omp target teams distribute parallel for
-	for(int64_t s=0;s<vol;s++){
-          zv[s]=xv[s]*yv[s];
-        }
+      for(int64_t s=0;s<vol;s++) {
+        zv[s]=xv[s]*yv[s];
       }
-
-      double stop=usecond();
-      double time = (stop-start)/Nloop*1000.0;
-
-      double bytes=3*vol*Nc*Nc*sizeof(Complex);
-      double flops=Nc*Nc*(6+8+8)*vol;
-      std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
+     #pragma omp target update from(zv._odata[ :zv.size()])
 
       printf("=====End GPU calculations=====\n");
-     //LatticeReal diff(&Grid);
+     //LatticeColourMatrix diff(&Grid);
      //auto dv=diff.View();
      for(int64_t s=0;s<1;s++){
        //dv[s]=zv[s]-zref_v[s];
@@ -169,9 +166,10 @@ int main (int argc, char ** argv)
       }
       double stop=usecond();
       double time = (stop-start)/Nloop*1000.0;
-      
-      double bytes=3*vol*Nc*Nc*sizeof(Complex);
-      double flops=Nc*Nc*(6+8+8)*vol;
+      double bytes=3.0*vol*Nc*Nc*sizeof(Complex);
+      double footprint=2.0*vol*Nc*Nc*sizeof(Complex);
+      double flops=Nc*Nc*(6.0+8.0+8.0)*vol;
+  
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
 #endif
     }

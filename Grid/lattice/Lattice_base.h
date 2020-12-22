@@ -60,12 +60,11 @@ void accelerator_inline conformable(GridBase *lhs,GridBase *rhs)
 #define LATTICE_VIEW_STRICT
 template<class vobj> class LatticeAccelerator : public LatticeBase
 {
-protected:
+public:
   GridBase *_grid;
   int checkerboard;
   vobj     *_odata;    // A managed pointer
   uint64_t _odata_size;    
-public:
   accelerator_inline LatticeAccelerator() : checkerboard(0), _odata(nullptr), _odata_size(0), _grid(nullptr) { }; 
   accelerator_inline uint64_t oSites(void) const { return _odata_size; };
   accelerator_inline int  Checkerboard(void) const { return checkerboard; };

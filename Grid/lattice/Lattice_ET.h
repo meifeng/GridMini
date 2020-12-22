@@ -83,17 +83,26 @@ struct getVectorType<Lattice<T> >{
 template<class sobj> accelerator_inline 
 sobj eval(const uint64_t ss, const sobj &arg)
 {
+#ifdef DEBUG
+printf("Lattice_ET.h: eval(const uint64_t ss, const sobj &arg)\n");
+#endif
   return arg;
 }
 
 template <class lobj> accelerator_inline 
 const lobj & eval(const uint64_t ss, const LatticeView<lobj> &arg) 
 {
+#ifdef DEBUG
+printf("Lattice_ET.h: eval(const uint64_t ss, const LatticeView<lobj> &arg)\n");
+#endif
   return arg[ss];
 }
 template <class lobj> accelerator_inline 
 const lobj & eval(const uint64_t ss, const Lattice<lobj> &arg) 
 {
+#ifdef DEBUG
+printf("Lattice_ET.h: eval(const uint64_t ss, const Lattice<lobj> &arg)\n");
+#endif 
   auto view = arg.View();
   return view[ss];
 }

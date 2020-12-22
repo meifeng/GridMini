@@ -292,6 +292,7 @@ public:
 				      const Grid_simd *__restrict__ l,
 				      const Grid_simd *__restrict__ r) {
     *y = (*l) * (*r);
+//     *y = mymult((*l), (*r));
   }
 
   friend accelerator_inline void sub(Grid_simd *__restrict__ y,
@@ -775,6 +776,13 @@ accelerator_inline Grid_simd<S, V> operator*(Grid_simd<S, V> a, Grid_simd<S, V> 
 #endif
   return ret;
 };
+
+template <class S, class V, IfNotComplex<S> = 0>
+accelerator_inline Grid_simd<S, V> mymult(Grid_simd<S, V> &a, Grid_simd<S, V> &b) {
+  Grid_simd<S, V> ret; 
+  ret.v = binary<V>(a.v, b.v, MultSIMD());
+  return ret;
+}
 
 // Distinguish between complex types and others
 template <class S, class V, IfComplex<S> = 0>

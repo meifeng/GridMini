@@ -2,6 +2,10 @@ CLANG_CXXFLAGS=-std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda
 SRCS=$(wildcard *.cc)
 
 %.x: $(SRCS)
+icpx:
+
+	icpx -std=c++14 -O3 -fiopenmp -fopenmp-targets=spir64 test-float.cc -o test-float.x
+	icpx -std=c++14 -O3 -fiopenmp -fopenmp-targets=spir64 test-template.cc -o test-template.x
 clang: 
 	clang++ -std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda test-template.cc -o test-template.x
 	clang++ -std=c++14 -g -fopenmp -O3 -fopenmp-targets=nvptx64-nvidia-cuda test-template-2.cc -o test-template-2.x

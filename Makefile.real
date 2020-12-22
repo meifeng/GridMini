@@ -1,7 +1,6 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
-#MAIN=Benchmark_REAL
-#MAIN=Benchmark_su3_debug
-MAIN=Benchmark_su3
+MAIN=Benchmark_REAL
+#MAIN=Benchmark_su3
 
 ##xlC
 #CXX=xlC_r
@@ -10,8 +9,8 @@ MAIN=Benchmark_su3
 
 ##icpx
 CXX=icpx
-CXXFLAGS=-std=c++14 -O2 -fiopenmp -fopenmp-targets=spir64 
-CXXFLAGS+=-DOMPTARGET -DOMPTARGET_UVM #-DDEBUG
+CXXFLAGS=-std=c++14 -O3 -fiopenmp -fopenmp-targets=spir64 
+CXXFLAGS+=-DOMPTARGET #-DDEBUG
 
 ##PGI
 #CXX=pgc++

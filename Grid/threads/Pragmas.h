@@ -126,21 +126,21 @@ void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
   accelerator_barrier(dummy);
 
 #elif defined (OMPTARGET)
+//#pragma omp requires unified_shared_memory
+
+extern "C" {
+   extern void *omp_target_alloc_shared(size_t size, int device_num);
+}
 extern uint32_t gpu_threads;
 #define accelerator 
 #define accelerator_inline strong_inline
 #define accelerator_for(iterator,num,nsimd, ... )  \
 {                                                  \
 	uint32_t nteams=(num+gpu_threads-1)/gpu_threads;  \
-       	_Pragma("omp target teams distribute parallel for num_teams(nteams) thread_limit(gpu_threads)") \
+       	_Pragma("omp target teams distribute parallel for") \
 	naked_for(iterator, num, { __VA_ARGS__ }); \
   }
-#define accelerator_forNB(iterator,num,nsimd, ... ) \
-  {						    \
-  	uint32_t nteams=(num+gpu_threads-1)/gpu_threads;  \
-        _Pragma("omp target teams distribute parallel for num_teams(nteams) thread_limit(gpu_threads)") \
-        naked_for(iterator, num, { __VA_ARGS__ }); \
-  }
+#define accelerator_forNB(iterator,num,nsimd, ... ) accelerator_for(iterator,num,nsimd, {__VA_ARGS__} )
 
 #define accelerator_barrier(dummy) 
 

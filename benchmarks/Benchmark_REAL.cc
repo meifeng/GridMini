@@ -91,8 +91,9 @@ int main (int argc, char ** argv)
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
   std::cout<<GridLogMessage << "  L  "<<"\t\t"<<"bytes"<<"\t\t\t"<<"GB/s\t\t GFlop/s"<<std::endl;
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
+#ifndef DEBUG
 #define DEBUG
-
+#endif
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){
 
       Coordinate latt_size  ({lat*mpi_layout[0],lat*mpi_layout[1],lat*mpi_layout[2],lat*mpi_layout[3]});
@@ -101,9 +102,9 @@ int main (int argc, char ** argv)
       GridCartesian     Grid(latt_size,simd_layout,mpi_layout);
       GridParallelRNG          pRNG(&Grid);      pRNG.SeedFixedIntegers(std::vector<int>({45,12,81,9}));
 
-      LatticeReal z(&Grid); random(pRNG,z);
-      LatticeReal x(&Grid); random(pRNG,x);
-      LatticeReal y(&Grid); random(pRNG,y);
+      LatticeReal z(&Grid); z=0.0;
+      LatticeReal x(&Grid); x=1.0;
+      LatticeReal y(&Grid); y=2.0;
 
 #ifdef DEBUG
       LatticeReal zref(&Grid); 
@@ -125,12 +126,25 @@ int main (int argc, char ** argv)
       
       printf("=====Beginning GPU calculations=====\n");
       //expression template calculation if enabled
-      z=x*y;
+//      z=x*y;
+
+      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()])	
+      #pragma omp target update     to(zv._odata[:zv.size()])
+      #pragma omp target enter data map(alloc:xv._odata[ :xv.size()])
+      #pragma omp target update     to(xv._odata[:xv.size()])
+      #pragma omp target enter data map(alloc:yv._odata[ :yv.size()])
+      #pragma omp target update     to(yv._odata[:yv.size()])
+     
+      #pragma omp target teams distribute parallel for
+      for(int64_t s=0;s<vol;s++) {
+        zv[s]=xv[s]*yv[s];
+      }
+      #pragma omp target update from(zv._odata[ :zv.size()])
 
       printf("=====End GPU calculations=====\n");
      //LatticeReal diff(&Grid);
      //auto dv=diff.View();
-     for(int64_t s=0;s<1;s++){
+     for(int64_t s=0;s<xv.size();s++){
        //dv[s]=zv[s]-zref_v[s];
        std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
        std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;

@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <stdio.h>
 #include <iostream>
+#include <complex>
 
 using namespace std;
 template <typename T>
@@ -18,16 +19,16 @@ inline template <typename T> vec<T> mult(vec<T> x, vec<T> y){
 int main(int argc, char* argv[]){
 
 	int N=10;
-        float x=1.0;
-	float y=2.0;
-	vec<float> in1,in2;
+        complex<double> x=1.0;
+	complex<double> y=2.0;
+	vec<double> in1,in2;
 	in1.v[0]=x;
 	in1.v[1]=x;
 	in2.v[0]=y;
 	in2.v[1]=y;
-	vec<float> out[N];
+	vec<double> out[N];
 printf("CPU calculation...\n");
-	vec<float> expected=mult(in1,in2);
+	vec<double> expected=mult(in1,in2);
 
 printf("GPU offloading...\n");
 
