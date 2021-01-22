@@ -35,8 +35,8 @@ int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (2)
-#define LMIN (2)
+#define LMAX (32)
+#define LMIN (4)
 #define LADD (4)
   int64_t Nwarm=50;
   int64_t Nloop=1000;
@@ -124,36 +124,16 @@ int main (int argc, char ** argv)
       printf("=====End reference CPU calculations=====\n");
      
       
-      printf("=====Beginning GPU calculations=====\n");
-      //expression template calculation if enabled
+//      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()])
+//      #pragma omp target update     to(zv._odata[:zv.size()])
+//      #pragma omp target enter data map(alloc:xv._odata[ :xv.size()])
+//      #pragma omp target update     to(xv._odata[:xv.size()])
+//      #pragma omp target enter data map(alloc:yv._odata[ :yv.size()])
+//      #pragma omp target update     to(yv._odata[:yv.size()])
 
-      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()])	
-      #pragma omp target update     to(zv._odata[:zv.size()])
-      #pragma omp target enter data map(alloc:xv._odata[ :xv.size()])
-      #pragma omp target update     to(xv._odata[:xv.size()])
-      #pragma omp target enter data map(alloc:yv._odata[ :yv.size()])
-      #pragma omp target update     to(yv._odata[:yv.size()])
-
-//      z=x*y;
-      #pragma omp target teams distribute parallel for
-      for(int64_t s=0;s<vol;s++) {
-        zv[s]=xv[s]*yv[s];
-      }
-     #pragma omp target update from(zv._odata[ :zv.size()])
-
-      printf("=====End GPU calculations=====\n");
-     //LatticeColourMatrix diff(&Grid);
-     //auto dv=diff.View();
-     for(int64_t s=0;s<1;s++){
-       //dv[s]=zv[s]-zref_v[s];
-       std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
-       std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
-       std::cout<<"GOT: s="<<s<<" z[]="<<zv[s]<<std::endl;
-       std::cout<<"EXPECTED: s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
-
-     }
-
-#else
+      #pragma omp target enter data map(to:zv._odata[ :zv.size()]) \
+				    map(to:xv._odata[ :xv.size()]) \
+      				    map(to:yv._odata[ :yv.size()])
 
       for(int64_t i=0;i<Nwarm;i++){
 	z=x*y;
@@ -164,6 +144,7 @@ int main (int argc, char ** argv)
       for(int64_t i=0;i<Nloop;i++){
 	z=x*y;
       }
+      #pragma omp target update from(zv._odata[ :zv.size()])
       double stop=usecond();
       double time = (stop-start)/Nloop*1000.0;
       double bytes=3.0*vol*Nc*Nc*sizeof(Complex);
@@ -171,6 +152,14 @@ int main (int argc, char ** argv)
       double flops=Nc*Nc*(6.0+8.0+8.0)*vol;
   
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
+
+     for(int64_t s=0;s<1;s++){
+       std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
+       std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
+       std::cout<<"GOT: s="<<s<<" z[]="<<zv[s]<<std::endl;
+       std::cout<<"EXPECTED: s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
+
+     }
 #endif
     }
 

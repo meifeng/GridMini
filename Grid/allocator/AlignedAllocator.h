@@ -29,6 +29,7 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #ifndef GRID_ALIGNED_ALLOCATOR_H
 #define GRID_ALIGNED_ALLOCATOR_H
 
+#include <Grid/threads/Pragmas.h>
 #ifdef HAVE_MALLOC_MALLOC_H
 #include <malloc/malloc.h>
 #endif
@@ -185,7 +186,7 @@ public:
 #elif defined (OMPTARGET_UVM)
     std::cout <<"OMPTARGET_UVM"<<std::endl;
     const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
-    if ( ptr == (_Tp *) NULL ) ptr = (_Tp *) omp_target_alloc_shared(bytes, device_id);
+    if ( ptr == (_Tp *) NULL ) ptr = (_Tp *) omp_target_alloc(bytes, device_id);
 #else 
     //////////////////////////////////////////////////////////////////////////////////////////
     // 2MB align; could make option probably doesn't need configurability
