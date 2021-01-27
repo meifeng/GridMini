@@ -139,12 +139,10 @@ int main (int argc, char ** argv)
       auto zref_v=zref.View();
   
            //CPU calculation
-      printf("=====Beginning reference CPU calculations=====\n");
       for(int64_t s=0;s<vol;s++) {
         zref_v[s]=xv[s]*yv[s];
       }
 
-      printf("=====End reference CPU calculations=====\n");
 
       #pragma omp target enter data map(to:zv._odata[ :zv.size()]) \
 				    map(to:xv._odata[ :xv.size()]) \
@@ -177,7 +175,7 @@ int main (int argc, char ** argv)
        #pragma omp target exit data map (delete:yv._odata[ :yv.size()])
        #pragma omp target exit data map (delete:xv._odata[ :xv.size()])
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
-
+#if 0
      for(int64_t s=0;s<1;s++){
        std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
        std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
@@ -185,6 +183,7 @@ int main (int argc, char ** argv)
        std::cout<<"EXPECTED: s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
 
      }
+#endif 
 #endif
     }
 
