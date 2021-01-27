@@ -16,7 +16,8 @@ CXX=clang++
 CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
 CXXFLAGS += -DOMPTARGET 
 CXXFLAGS +=-DOMPTARGET_MANAGED
-#CXXFLAGS += -DVECTOR_LOOPS
+LLVMFLAGS = -S -emit-llvm
+#CXXFLAGS += -DVECTOR_LOOPS -Xclang -fdump-record-layouts-simple
 #CXXFLAGS += -DDEBUG
 
 ##NVCC
@@ -48,6 +49,25 @@ all:
                 -o ${MAIN}.x \
                 -DGEN \
                 -DGEN_SIMD_WIDTH=16 \
+                -DHAVE_MALLOC_H \
+                -DGRID_COMMS_NONE \
+                -DGRID_DEFAULT_PRECISION_DOUBLE \
+		-DRNG_RANLUX
+
+
+llvm:
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) \
+		benchmarks/${MAIN}.cc \
+                Grid/util/Init.cc \
+                Grid/communicator/SharedMemory.cc \
+                Grid/communicator/SharedMemoryNone.cc \
+                Grid/allocator/AlignedAllocator.cc \
+                Grid/communicator/Communicator_base.cc \
+                Grid/communicator/Communicator_none.cc  \
+                Grid/log/Log.cc \
+                $(LLVMFLAGS) \
+                -DGEN \
+                -DGEN_SIMD_WIDTH=32 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
