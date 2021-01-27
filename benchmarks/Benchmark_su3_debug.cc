@@ -124,43 +124,31 @@ int main (int argc, char ** argv)
       printf("=====End reference CPU calculations=====\n");
      
       
-      printf("=====Beginning GPU calculations=====\n");
-      //expression template calculation if enabled
-
-      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()])	
-      #pragma omp target update     to(zv._odata[:zv.size()])
-      #pragma omp target enter data map(alloc:xv._odata[ :xv.size()])
-      #pragma omp target update     to(xv._odata[:xv.size()])
-      #pragma omp target enter data map(alloc:yv._odata[ :yv.size()])
-      #pragma omp target update     to(yv._odata[:yv.size()])
-
-//      z=x*y;
-      #pragma omp target teams distribute parallel for
-      for(int64_t s=0;s<vol;s++) {
-        zv[s]=xv[s]*yv[s];
-      }
-     #pragma omp target update from(zv._odata[ :zv.size()])
-
-      printf("=====End GPU calculations=====\n");
-     //LatticeColourMatrix diff(&Grid);
-     //auto dv=diff.View();
-     for(int64_t s=0;s<1;s++){
-       //dv[s]=zv[s]-zref_v[s];
-       std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
-       std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
-       std::cout<<"GOT: s="<<s<<" z[]="<<zv[s]<<std::endl;
-       std::cout<<"EXPECTED: s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
-
-     }
+//      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()])
+//      #pragma omp target update     to(zv._odata[:zv.size()])
+//      #pragma omp target enter data map(alloc:xv._odata[ :xv.size()])
+//      #pragma omp target update     to(xv._odata[:xv.size()])
+//      #pragma omp target enter data map(alloc:yv._odata[ :yv.size()])
+//      #pragma omp target update     to(yv._odata[:yv.size()])
 
 #else
+      LatticeColourMatrix zref(&Grid); 
       auto xv=x.View();
       auto yv=y.View();
       auto zv=z.View();
+      auto zref_v=zref.View();
+  
+           //CPU calculation
+      printf("=====Beginning reference CPU calculations=====\n");
+      for(int64_t s=0;s<vol;s++) {
+        zref_v[s]=xv[s]*yv[s];
+      }
 
-      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()])
-      #pragma omp target enter data map(to:xv._odata[ :xv.size()])
-      #pragma omp target enter data map(to:yv._odata[ :yv.size()])
+      printf("=====End reference CPU calculations=====\n");
+
+      #pragma omp target enter data map(to:zv._odata[ :zv.size()]) \
+				    map(to:xv._odata[ :xv.size()]) \
+      				    map(to:yv._odata[ :yv.size()])
 
       for(int64_t i=0;i<Nwarm;i++){
      #pragma omp target teams distribute parallel for
@@ -187,6 +175,14 @@ int main (int argc, char ** argv)
       double flops=Nc*Nc*(6.0+8.0+8.0)*vol;
        #pragma omp target exit data map (from:zv._odata[ :zv.size()])
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
+
+     for(int64_t s=0;s<1;s++){
+       std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
+       std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
+       std::cout<<"GOT: s="<<s<<" z[]="<<zv[s]<<std::endl;
+       std::cout<<"EXPECTED: s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
+
+     }
 #endif
     }
 

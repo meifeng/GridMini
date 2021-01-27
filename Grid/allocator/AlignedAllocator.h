@@ -29,6 +29,7 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #ifndef GRID_ALIGNED_ALLOCATOR_H
 #define GRID_ALIGNED_ALLOCATOR_H
 
+#include <Grid/threads/Pragmas.h>
 #ifdef HAVE_MALLOC_MALLOC_H
 #include <malloc/malloc.h>
 #endif
