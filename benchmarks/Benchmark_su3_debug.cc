@@ -174,6 +174,8 @@ int main (int argc, char ** argv)
       double footprint=2.0*vol*Nc*Nc*sizeof(Complex);
       double flops=Nc*Nc*(6.0+8.0+8.0)*vol;
        #pragma omp target exit data map (from:zv._odata[ :zv.size()])
+       #pragma omp target exit data map (delete:yv._odata[ :yv.size()])
+       #pragma omp target exit data map (delete:xv._odata[ :xv.size()])
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
 
      for(int64_t s=0;s<1;s++){
