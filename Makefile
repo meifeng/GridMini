@@ -1,7 +1,7 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
 #MAIN=Benchmark_REAL
-#MAIN=Benchmark_su3_debug
-MAIN=Benchmark_su3
+MAIN=Benchmark_su3_debug
+#MAIN=Benchmark_su3
 
 ##xlC
 #CXX=xlC_r
@@ -9,18 +9,19 @@ MAIN=Benchmark_su3
 #CXXFLAGS+=-DOMPTARGET -DOMPTARGET_MANAGED
 
 ##icpx
-CXX=icpx
-CXXFLAGS=-std=c++14 -O2 -fiopenmp -fopenmp-targets=spir64 
-CXXFLAGS+=-DOMPTARGET -DOMPTARGET_UVM #-DDEBUG
+#CXX=icpx
+#CXXFLAGS=-std=c++14 -O2 -fiopenmp -fopenmp-targets=spir64 
+#CXXFLAGS+=-DOMPTARGET -DOMPTARGET_UVM #-DDEBUG
 
 ##PGI
 #CXX=pgc++
 #CXXFLAGS=-fast --c++14 -acc -Mnollvm -Minfo=accel -ta=tesla:cc70,managed -Mlarge_arrays --no_exceptions
 
 ##Clang
-#CXX=clang++
-#CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
-#CXXFLAGS += -DOMPTARGET 
+CXX=clang++
+CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+CXXFLAGS += -DOMPTARGET -Wno-unknown-cuda-version
+#CXXFLAGS += -DOMPTARGET_UVM
 #CXXFLAGS +=-DOMPTARGET_MANAGED
 #CXXFLAGS += -DVECTOR_LOOPS
 #CXXFLAGS += -DDEBUG
