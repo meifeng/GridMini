@@ -355,7 +355,7 @@ std::cout<<"6"<<std::endl;
     thread_for(ss,me.size(),{
       me[ss] = r;
     });
-std::cout<<"AA"<<std::endl;
+//std::cout<<"AA"<<std::endl;
 //#pragma omp target update to(me[0:me.size()])
     return *this;
   }

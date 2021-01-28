@@ -102,6 +102,7 @@ template <> struct W<uint16_t> {
 template <typename T>
 struct vec {
   alignas(GEN_SIMD_WIDTH) T v[W<T>::r];
+//    T v[W<T>::r];
 //  unsigned int size=W<T>::r;
 };
 #endif

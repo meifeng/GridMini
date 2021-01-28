@@ -138,18 +138,21 @@ int main (int argc, char ** argv)
       auto zv=z.View();
       auto zref_v=zref.View();
   
-           //CPU calculation
+      vol=zv.size();
+
+      //CPU calculation
       for(int64_t s=0;s<vol;s++) {
         zref_v[s]=xv[s]*yv[s];
       }
 
 
-      #pragma omp target enter data map(to:zv._odata[ :zv.size()]) \
+      extern uint32_t gpu_threads;
+      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()]) \
 				    map(to:xv._odata[ :xv.size()]) \
       				    map(to:yv._odata[ :yv.size()])
 
       for(int64_t i=0;i<Nwarm;i++){
-     #pragma omp target teams distribute parallel for
+     #pragma omp target teams distribute parallel for thread_limit(gpu_threads)
       for(int64_t s=0;s<vol;s++) {
         zv[s]=xv[s]*yv[s];
       }
@@ -160,7 +163,7 @@ int main (int argc, char ** argv)
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
 
-      #pragma omp target teams distribute parallel for
+      #pragma omp target teams distribute parallel for thread_limit(gpu_threads)
       for(int64_t s=0;s<vol;s++) {
         zv[s]=xv[s]*yv[s];
       }
@@ -177,6 +180,7 @@ int main (int argc, char ** argv)
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
 #if 0
      for(int64_t s=0;s<1;s++){
+       std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
        std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
        std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
        std::cout<<"GOT: s="<<s<<" z[]="<<zv[s]<<std::endl;
@@ -341,4 +345,4 @@ int main (int argc, char ** argv)
     }
 #endif
   Grid_finalize();
-}
+ }

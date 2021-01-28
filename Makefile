@@ -21,6 +21,7 @@ MAIN=Benchmark_su3_debug
 CXX=clang++
 CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
 CXXFLAGS += -DOMPTARGET -Wno-unknown-cuda-version
+#CXXFLAGS += -Xclang -fdump-record-layouts
 #CXXFLAGS += -DOMPTARGET_UVM
 #CXXFLAGS +=-DOMPTARGET_MANAGED
 #CXXFLAGS += -DVECTOR_LOOPS
@@ -54,7 +55,7 @@ all:
                 Grid/log/Log.cc \
                 -o ${MAIN}.x \
                 -DGEN \
-                -DGEN_SIMD_WIDTH=16 \
+                -DGEN_SIMD_WIDTH=32 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
