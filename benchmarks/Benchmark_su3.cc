@@ -38,9 +38,13 @@ int main (int argc, char ** argv)
 
 #define LMAX (36)
 #define LMIN (36)
+int64_t Nwarm=50;
+int64_t Nloop=1000;
+//#define LMAX (4)
+//#define LMIN (4)
+//  int64_t Nwarm=1;
+//  int64_t Nloop=1;
 #define LADD (4)
-  int64_t Nwarm=50;
-  int64_t Nloop=1000;
  
   Coordinate simd_layout = GridDefaultSimd(Nd,vComplex::Nsimd());
   std::cout<<GridLogMessage << "Grid simd_layout" << simd_layout << std::endl;

@@ -754,6 +754,7 @@ template <class S, class V, IfComplex<S> = 0>
 accelerator_inline Grid_simd<S, V> operator*(Grid_simd<S, V> a, Grid_simd<S, V> b) {
   Grid_simd<S, V> ret;
   ret.v = binary<V>(a.v, b.v, MultComplexSIMD());
+  //printf("s %lu\n", sizeof(a.v));
 #ifdef DEBUG
   printf("a.v = %f, b.v = %f, ret.v = %f\n", a.v.v[0], b.v.v[0], ret.v.v[0]);
 #endif
