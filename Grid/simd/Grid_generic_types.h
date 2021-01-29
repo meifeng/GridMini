@@ -42,8 +42,8 @@ static_assert(GEN_SIMD_WIDTH % 16u == 0, "SIMD vector size is not an integer mul
 //  for (unsigned int i = 0; i < w; i += inc)
 #if defined OMPTARGET
 #define VECTOR_FOR(i, w, inc)                   \
-  _Pragma("omp simd") 			\
   for (unsigned int i = 0; i < w; i += inc)
+  //_Pragma("omp simd") 			\
 #else
 #define VECTOR_FOR(i, w, inc)			\
   for (unsigned int i = 0; i < w; i += inc)
