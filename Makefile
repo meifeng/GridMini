@@ -31,6 +31,10 @@ CXXFLAGS += -DOMPTARGET -Wno-unknown-cuda-version
 #CXX=nvcc
 #CXXFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
 
+##NVC++ for OpenMP offloading
+#CXX=nvc++
+#CXXFLAGS=-std=c++14 -mp=gpu -gpu=cc70  -DOMPTARGET -Minfo
+
 ##GCC
 #CXX=g++
 #CXXFLAGS=-std=c++14 -O3 -fopenmp -foffload=nvptx-none -DOMPTARGET -DOMPTARGET_MANAGED -DDEBUG -lcudart
@@ -38,7 +42,8 @@ CXXFLAGS += -DOMPTARGET -Wno-unknown-cuda-version
 ##CRAY CCE
 #CXX=CC
 #CXXFLAGS=-std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=sm_70
-#CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
+#CXXFLAGS += -DOMPTARGET 
+#CXXFLAGS += -DOMPTARGET_MANAGED
 #CXXFLAGS += -DDEBUG
 
 INCLUDES=-I./ -I${CUDA_ROOT}/include
@@ -55,7 +60,7 @@ all:
                 Grid/log/Log.cc \
                 -o ${MAIN}.x \
                 -DGEN \
-                -DGEN_SIMD_WIDTH=32 \
+                -DGEN_SIMD_WIDTH=16 \
                 -DHAVE_MALLOC_H \
                 -DGRID_COMMS_NONE \
                 -DGRID_DEFAULT_PRECISION_DOUBLE \
