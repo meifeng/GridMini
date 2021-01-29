@@ -143,14 +143,23 @@ int main (int argc, char ** argv)
         zref_v[s]=xv[s]*yv[s];
       }
 
+#pragma omp declare mapper(decltype(xv) x) map(x._odata[0:x.size()]) map(x)
+//#pragma omp declare mapper(decltype(xv) x) map(x._odata[0:x.size()])
 
-      #pragma omp target enter data map(to:zv._odata[ :zv.size()]) \
-				    map(to:xv._odata[ :xv.size()]) \
-      				    map(to:yv._odata[ :yv.size()])
+      fprintf(stderr, "P: %p  %p\n", &xv, xv._odata);
+      fprintf(stderr, "P: %p  %p\n", &yv, yv._odata);
+      fprintf(stderr, "P: %p  %p\n", &zv, zv._odata);
+    //  #pragma omp target enter data map(to:zv._odata[ :zv.size()]) \
+	//			    map(to:xv._odata[ :xv.size()])
+#pragma omp target enter data map(to:xv) map(alloc:zv)
+#pragma omp target enter data map(to:yv)
+//#pragma omp target enter data map(to:yv._odata[ :yv.size()])
+      				    //map(to:yv._odata[ :yv.size()])
 
       for(int64_t i=0;i<Nwarm;i++){
      #pragma omp target teams distribute parallel for
       for(int64_t s=0;s<vol;s++) {
+        //zv[s]=xv[s]*yv[s];
         zv[s]=xv[s]*yv[s];
       }
       //	      z=x*y;
@@ -171,9 +180,12 @@ int main (int argc, char ** argv)
       double bytes=3.0*vol*Nc*Nc*sizeof(Complex);
       double footprint=2.0*vol*Nc*Nc*sizeof(Complex);
       double flops=Nc*Nc*(6.0+8.0+8.0)*vol;
-       #pragma omp target exit data map (from:zv._odata[ :zv.size()])
-       #pragma omp target exit data map (delete:yv._odata[ :yv.size()])
-       #pragma omp target exit data map (delete:xv._odata[ :xv.size()])
+       #pragma omp target exit data map (from:zv)
+       #pragma omp target exit data map (delete:yv)
+       #pragma omp target exit data map (delete:xv)
+       //#pragma omp target exit data map (from:zv._odata[ :zv.size()])
+       //#pragma omp target exit data map (delete:yv._odata[ :yv.size()])
+       //#pragma omp target exit data map (delete:xv._odata[ :xv.size()])
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
 #if 0
      for(int64_t s=0;s<1;s++){
