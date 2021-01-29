@@ -28,6 +28,8 @@ Author: paboyle <paboyle@ph.ed.ac.uk>
 /*  END LEGAL */
 #pragma once
 
+#include <stdint.h>
+
 #ifndef MAX
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #define MIN(x,y) ((x)>(y)?(y):(x))
