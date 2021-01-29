@@ -138,7 +138,7 @@ extern uint32_t gpu_threads;
 #define accelerator_for(iterator,num,nsimd, ... )  \
 {                                                  \
 	uint32_t nteams=(num+gpu_threads-1)/gpu_threads;  \
-       	_Pragma("omp target teams distribute parallel for") \
+       	_Pragma("omp target teams distribute parallel for thread_limit(gpu_threads)") \
 	naked_for(iterator, num, { __VA_ARGS__ }); \
   }
 #define accelerator_forNB(iterator,num,nsimd, ... ) accelerator_for(iterator,num,nsimd, {__VA_ARGS__} )
