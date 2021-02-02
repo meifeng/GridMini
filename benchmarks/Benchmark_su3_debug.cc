@@ -178,7 +178,7 @@ int main (int argc, char ** argv)
        #pragma omp target exit data map (delete:yv._odata[ :yv.size()])
        #pragma omp target exit data map (delete:xv._odata[ :xv.size()])
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
-#if 1
+#if 0
      for(int64_t s=0;s<1;s++){
        std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
        std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
