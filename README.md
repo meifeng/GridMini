@@ -1,7 +1,7 @@
 # GridMini
 This is a miniapp for Lattice QCD derived from Grid (https://github.com/paboyle/Grid)
 
-DISCLAIMER: This is an ongoing development code. Functionalities are not guaranteed to be working correctly. 
+DISCLAIMER: This is an ongoing development code. Functionalities are not guaranteed to be working correctly. More instructions for compiling and running GridMini are forthcomping. Please be patient. 
 
 Currently supported benchmarks include
 - Benchmark_su3.cc
