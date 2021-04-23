@@ -34,14 +34,14 @@ NAMESPACE_BEGIN(Grid);
 //accelerator_inline void SIMTsynchronise(void) 
 accelerator_inline void synchronise(void) 
 {
-#ifdef __CUDA_ARCH__
+#ifdef GRID_NVCC
 //  __syncthreads();
   __syncwarp();
 #endif
   return;
 }
 
-#ifndef __CUDA_ARCH__
+#ifndef GRID_NVCC
 //////////////////////////////////////////
 // Trivial mapping of vectors on host
 //////////////////////////////////////////
