@@ -22,28 +22,26 @@ MAIN=Benchmark_su3_debug
 #CXX=clang++
 #CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
 #CXXFLAGS += -DOMPTARGET -Wno-unknown-cuda-version
-#CXXFLAGS += -Xclang -fdump-record-layouts
-#CXXFLAGS += -DOMPTARGET_UVM
-#CXXFLAGS +=-DOMPTARGET_MANAGED
-#CXXFLAGS += -DVECTOR_LOOPS
-#LLVMFLAGS = -S -emit-llvm
-#CXXFLAGS += -DVECTOR_LOOPS -Xclang -fdump-record-layouts-simple
-#CXXFLAGS += -DDEBUG
-
-##AOMP Clang - AMD GPU
-CXX=clang++
-CXXFLAGS=-std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-version=50
-CXXFLAGS += -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx906
-CXXFLAGS += -DOMPTARGET 
-#CXXFLAGS += -Xclang -fdump-record-layouts
-#CXXFLAGS += -DOMPTARGET_UVM
-#CXXFLAGS +=-DOMPTARGET_MANAGED
+##CXXFLAGS += -Xclang -fdump-record-layouts
+##CXXFLAGS += -DOMPTARGET_UVM
+##CXXFLAGS +=-DOMPTARGET_MANAGED
+##CXXFLAGS += -DVECTOR_LOOPS
+##LLVMFLAGS = -S -emit-llvm
+##CXXFLAGS += -DVECTOR_LOOPS -Xclang -fdump-record-layouts-simple
+##CXXFLAGS += -DDEBUG
 
 ##AOMP Clang - NVIDIA V100 GPU
 #CXX=clang++
-#CXXFLAGS = -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-version=50 
+#CXXFLAGS = -std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-version=50
 #CXXFLAGS += -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target=nvptx64-nvidia-cuda -march=sm_70
 #CXXFLAGS += -DOMPTARGET
+
+
+##AOMP Clang - AMD GPU
+CXX=clang++ -fopenmp-version=50 -fopenmp-cuda-mode
+CXXFLAGS=-std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx908
+CXXFLAGS += -DOMPTARGET
+##CXXFLAGS += -DDEBUG
 
 ##NVCC
 #CXX=nvcc
