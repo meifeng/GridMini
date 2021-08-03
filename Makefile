@@ -1,8 +1,8 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
 #MAIN=Benchmark_REAL
 #MAIN=Benchmark_su3_mapper
-#MAIN=Benchmark_su3
-MAIN=Benchmark_su3_debug
+MAIN=Benchmark_su3
+#MAIN=Benchmark_su3_debug
 
 ##xlC
 #CXX=xlC_r
@@ -38,14 +38,22 @@ MAIN=Benchmark_su3_debug
 
 
 ##AOMP Clang - AMD GPU
-CXX=clang++ -fopenmp-version=50 -fopenmp-cuda-mode
-CXXFLAGS=-std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx908
-CXXFLAGS += -DOMPTARGET
+#CXX=clang++ -fopenmp-version=50 -fopenmp-cuda-mode
+#CXXFLAGS=-std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx906
+#CXXFLAGS += -DOMPTARGET
 ##CXXFLAGS += -DDEBUG
 
 ##NVCC
 #CXX=nvcc
 #CXXFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
+
+##HIPCC
+CXX=hipcc
+CXXFLAGS= -I. -std=c++14 --amdgpu-target=gfx906
+
+##HIPCC for NVIDIA 
+#CXX=hipcc
+#CXXFLAGS=-D__HIP_PLATFORM_NVIDIA -arch=sm_70 -I. -std=c++14
 
 ##NVC++ for OpenMP offloading
 #CXX=nvc++

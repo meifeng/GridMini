@@ -74,11 +74,64 @@ Author: paboyle <paboyle@ph.ed.ac.uk>
 //////////////////////////////////////////////////////////////////////////////////
 // Accelerator primitives; fall back to threading
 //////////////////////////////////////////////////////////////////////////////////
-#ifdef __NVCC__
+#ifdef __NVCC__ 
 #define GRID_NVCC
 #endif
 
+#ifdef __HIPCC__
+#define GRID_HIPCC
+#include "hip/hip_runtime.h"
+#endif
+
 #ifdef GRID_NVCC
+extern uint32_t gpu_threads;
+
+#define accelerator        __host__ __device__
+#define accelerator_inline __host__ __device__ inline
+
+template<typename lambda>  __global__
+void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
+{
+  uint64_t isite = threadIdx.y;
+  uint64_t osite = threadIdx.x+blockDim.x*blockIdx.x;
+  if ( (osite <Osites) && (isite<Isites) ) {
+    Lambda(isite,osite);
+  }
+}
+
+/////////////////////////////////////////////////////////////////
+// Internal only really... but need to call when
+/////////////////////////////////////////////////////////////////
+#define accelerator_barrier(dummy)                              \
+  {                                                             \
+    cudaDeviceSynchronize();                                    \
+    cudaError err = cudaGetLastError();                         \
+    if ( cudaSuccess != err ) {                                 \
+      printf("Cuda error %s \n", cudaGetErrorString( err )); \
+      puts(__FILE__); \
+      printf("Line %d\n",__LINE__);                                     \
+      exit(0);                                                  \
+    }                                                           \
+  }
+
+// Copy the for_each_n style ; Non-blocking variant
+#define accelerator_forNB( iterator, num, nsimd, ... )                  \
+  {                                                                     \
+    typedef uint64_t Iterator;                                          \
+    auto lambda = [=] accelerator (Iterator lane,Iterator iterator) mutable { \
+      __VA_ARGS__;                                                      \
+    };                                                                  \
+    dim3 cu_threads(gpu_threads,nsimd);                                 \
+    dim3 cu_blocks ((num+gpu_threads-1)/gpu_threads);                   \
+    LambdaApplySIMT<<<cu_blocks,cu_threads>>>(nsimd,num,lambda);        \
+  }
+
+// Copy the for_each_n style ; Non-blocking variant (default
+#define accelerator_for( iterator, num, nsimd, ... )            \
+  accelerator_forNB(iterator, num, nsimd, { __VA_ARGS__ } );    \
+  accelerator_barrier(dummy);
+
+#elif defined (GRID_HIPCC)
 
 extern uint32_t gpu_threads;
 
@@ -100,10 +153,10 @@ void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
 /////////////////////////////////////////////////////////////////
 #define accelerator_barrier(dummy)				\
   {								\
-    cudaDeviceSynchronize();					\
-    cudaError err = cudaGetLastError();				\
-    if ( cudaSuccess != err ) {					\
-      printf("Cuda error %s \n", cudaGetErrorString( err )); \
+    hipDeviceSynchronize();					\
+    hipError_t err = hipGetLastError();				\
+    if ( hipSuccess != err ) {					\
+      printf("Cuda error %s \n", hipGetErrorString( err )); \
       puts(__FILE__); \
       printf("Line %d\n",__LINE__);					\
       exit(0);							\
@@ -119,7 +172,7 @@ void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
     };									\
     dim3 cu_threads(gpu_threads,nsimd);					\
     dim3 cu_blocks ((num+gpu_threads-1)/gpu_threads);			\
-    LambdaApplySIMT<<<cu_blocks,cu_threads>>>(nsimd,num,lambda);	\
+    hipLaunchKernelGGL(LambdaApplySIMT, dim3(cu_blocks), dim3(cu_threads), 0, 0, nsimd,num,lambda);	\
   }
 
 // Copy the for_each_n style ; Non-blocking variant (default
