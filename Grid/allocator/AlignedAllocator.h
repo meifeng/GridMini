@@ -183,6 +183,23 @@ public:
     }
     assert( ptr != (_Tp *)NULL);
     //cudaMemAdvise ( (void*)ptr, bytes, cudaMemAdviseSetPreferredLocation, 0);
+
+#elif defined (GRID_HIPCC)
+
+    ////////////////////////////////////
+    // Unified (managed) memory
+    ////////////////////////////////////
+    if ( ptr == (_Tp *) NULL ) {
+      auto err = hipMallocManaged((void **)&ptr,bytes);
+      if( err != hipSuccess ) {
+	ptr = (_Tp *) NULL;
+	std::cerr << " hipMallocManaged failed for " << bytes<<" bytes " <<hipGetErrorString(err)<< std::endl;
+	assert(0);
+      }
+    }
+    assert( ptr != (_Tp *)NULL);
+    //hipMemAdvise ( (void*)ptr, bytes, hipMemAdviseSetPreferredLocation, 0);
+
 #elif defined (OMPTARGET_UVM)
     std::cout <<"OMPTARGET_UVM"<<std::endl;
     const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
@@ -229,6 +246,8 @@ public:
 
 #if defined(GRID_NVCC) || defined (OMPTARGET_MANAGED)
     if ( __freeme ) cudaFree((void *)__freeme);
+#elif defined(GRID_HIPCC) 
+    if ( __freeme ) hipFree((void *)__freeme);
 
 #elif defined (OMPTARGET_UVM) 
     const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
