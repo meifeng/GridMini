@@ -28,17 +28,18 @@ Author: Peter Boyle <peterboyle@Peters-MacBook-Pro-2.local>
     /*  END LEGAL */
 #include <Grid/GridCore.h>
 #include <Grid/GridStd.h>
-#include <cuda_profiler_api.h>
 using namespace std;
 using namespace Grid;
-
+#ifdef OMPTARGET_UVM
+#pragma omp requires unified_shared_memory
+#endif
 int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
-#define LMAX (64)
-#define LMIN (4)
-#define LADD (4)
+#define LMAX (48)
+#define LMIN (8)
+#define LADD (8)
 int64_t Nwarm=50;
 int64_t Nloop=1000;
  
@@ -47,7 +48,8 @@ int64_t Nloop=1000;
   Coordinate mpi_layout  = GridDefaultMpi();
 
   int64_t threads = GridThread::GetThreads();
-  std::cout<<GridLogMessage << "Grid is setup to use "<<threads<<" threads"<<std::endl;
+  std::cout<<GridLogMessage << "Grid is setup to use "<<threads<<" CPU threads"<<std::endl;
+  std::cout<<GridLogMessage << "Grid is setup to use "<<gpu_threads<<" GPU threads"<<std::endl;
   std::cout<<GridLogMessage << "Grid is setup to use "<<Nd<<" dimensions"<<std::endl;
 
 #if 0
@@ -93,10 +95,6 @@ int64_t Nloop=1000;
   std::cout<<GridLogMessage << "  L  "<<"\t\t"<<"bytes"<<"\t\t\t"<<"GB/s\t\t GFlop/s"<<std::endl;
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
 
-#ifndef DEBUG
-//#define DEBUG
-#endif
-
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){
 
       Coordinate latt_size  ({lat*mpi_layout[0],lat*mpi_layout[1],lat*mpi_layout[2],lat*mpi_layout[3]});
@@ -109,76 +107,85 @@ int64_t Nloop=1000;
       LatticeColourMatrix x(&Grid); random(pRNG,x);
       LatticeColourMatrix y(&Grid); random(pRNG,y);
 
-#ifdef DEBUG
-      LatticeColourMatrix zref(&Grid); 
       auto xv=x.View();
       auto yv=y.View();
       auto zv=z.View();
+#ifdef SPOT_CHECK 
+      LatticeColourMatrix zref(&Grid); 
       auto zref_v=zref.View();
       
-      std::cout<<"DEBUG mode...."<<std::endl;
+      std::cout<<"SPOT_CHECK mode...."<<std::endl;
      
       //CPU calculation
       printf("=====Beginning reference CPU calculations=====\n");
       for(int64_t s=0;s<vol;s++) {
         zref_v[s]=xv[s]*yv[s];
       }
-      
       printf("=====End reference CPU calculations=====\n");
      
       
       printf("=====Beginning GPU calculations=====\n");
       //expression template calculation if enabled
-      double start=usecond();
+      z=x*y;
+      printf("=====End GPU calculations=====\n");
+      
+     LatticeColourMatrix diff(&Grid);
+     diff=z-zref;
+     auto dv=diff.View();
+     int s=SPOT_CHECK; 
+     if (s >= vol) {
+	     std::cout<<"Spot check failed; index out of bound"<<std::endl;
+     	     return -1;
+     }
+     std::cout<<"s="<<s<<": CPU-GPU = "<<dv[s]<<std::endl;
+     std::cout<<"s="<<s<<": GOT:" <<zv[s]<<" \n EXPECTED: "<<zref_v[s]<<std::endl;
+     
 
-      for(int64_t i=0;i<Nloop;i++){
-//      #pragma omp target teams distribute parallel for
-//	for(int64_t s=0;s<vol;s++){
- //         zv[s]=xv[s]*yv[s];
-//        }
-        z=x*y;
+#endif
+
+#if defined (OMPTARGET)  && defined (OMPTARGET_MAP) 
+     #pragma omp target enter data map(alloc:zv._odata[ :zv.size()]) \
+                                    map(to:xv._odata[ :xv.size()]) \
+                                    map(to:yv._odata[ :yv.size()])
+
+      for(int64_t i=0;i<Nwarm;i++){
+     #pragma omp target teams distribute parallel for thread_limit(gpu_threads)
+      for(int64_t s=0;s<vol;s++) {
+        zv[s]=xv[s]*yv[s];
+      }
       }
 
+
+      double start=usecond();
+      for(int64_t i=0;i<Nloop;i++){
+      #pragma omp target teams distribute parallel for thread_limit(gpu_threads)
+      for(int64_t s=0;s<vol;s++) {
+        zv[s]=xv[s]*yv[s];
+      }
+      }
       double stop=usecond();
-      double time = (stop-start)/Nloop*1000.0;
-
-      double bytes=3*vol*Nc*Nc*sizeof(Complex);
-      double flops=Nc*Nc*(6+8+8)*vol;
-      std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
-
-      printf("=====End GPU calculations=====\n");
-     //LatticeReal diff(&Grid);
-     //auto dv=diff.View();
-     for(int64_t s=0;s<1;s++){
-       //dv[s]=zv[s]-zref_v[s];
-       std::cout<<"s="<<s<<" x[]="<<xv[s]<<std::endl;
-       std::cout<<"s="<<s<<" y[]="<<yv[s]<<std::endl;
-       std::cout<<"GOT: s="<<s<<" z[]="<<zv[s]<<std::endl;
-       std::cout<<"EXPECTED: s="<<s<<"zref[]="<<zref_v[s]<<std::endl;
-
-     }
-
+       #pragma omp target exit data map (from:zv._odata[ :zv.size()])
+       #pragma omp target exit data map (delete:yv._odata[ :yv.size()])
+       #pragma omp target exit data map (delete:xv._odata[ :xv.size()])
 #else
-
       for(int64_t i=0;i<Nwarm;i++){
 	z=x*y;
       }
 
 
-      cudaProfilerStart();
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
 	z=x*y;
       }
       double stop=usecond();
-      cudaProfilerStop();
+#endif
       double time = (stop-start)/Nloop*1000.0;
       
       double bytes=3*vol*Nc*Nc*sizeof(Complex);
       double flops=Nc*Nc*(6+8+8)*vol;
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
-#endif
-    }
+
+  }
 
 #if 0
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
