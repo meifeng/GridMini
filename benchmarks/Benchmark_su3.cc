@@ -31,6 +31,15 @@ Author: Peter Boyle <peterboyle@Peters-MacBook-Pro-2.local>
 using namespace std;
 using namespace Grid;
 
+
+#define TILE_SZ 4
+
+#define UNROLL_FACTOR 2
+
+#define TILE
+#define UNROLL
+//#define OMP_TILE
+//#define OMP_UNROLL
 int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
