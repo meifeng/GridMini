@@ -49,6 +49,9 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #endif
 NAMESPACE_BEGIN(Grid);
 
+
+extern "C" void *llvm_omp_target_alloc_shared(size_t,int);
+
 // Move control to configure.ac and Config.h?
 #ifdef POINTER_CACHE
 class PointerCache {
@@ -184,9 +187,9 @@ public:
     assert( ptr != (_Tp *)NULL);
     //cudaMemAdvise ( (void*)ptr, bytes, cudaMemAdviseSetPreferredLocation, 0);
 #elif defined (OMPTARGET_UVM)
-    std::cout <<"OMPTARGET_UVM"<<std::endl;
     const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
     if ( ptr == (_Tp *) NULL ) ptr = (_Tp *) omp_target_alloc(bytes, device_id);
+    std::cout <<"OMPTARGET_UVM"<<std::endl;
 #else 
     //////////////////////////////////////////////////////////////////////////////////////////
     // 2MB align; could make option probably doesn't need configurability
