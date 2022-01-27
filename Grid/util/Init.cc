@@ -194,7 +194,7 @@ void GridParseLayout(char **argv,int argc,
   }
   if( GridCmdOptionExists(argv,argv+argc,"--gpu-threads") ){
     std::vector<int> gputhreads(0);
-#ifndef GRID_NVCC
+#if (!defined GRID_NVCC) && (!defined OMPTARGET) 
     std::cout << GridLogWarning << "'--gpu-threads' option used but Grid was"
               << " not compiled with GPU support" << std::endl;
 #endif
