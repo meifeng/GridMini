@@ -36,7 +36,7 @@ accelerator_inline void synchronise(void)
 {
 #ifdef GRID_NVCC
 //  __syncthreads();
-  __syncwarp();
+//  __syncwarp();
 #endif
   return;
 }
