@@ -129,7 +129,7 @@ void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
 
 #elif defined (OMPTARGET)
 #ifdef OMPTARGET_UVM
-#pragma omp requires unified_shared_memory
+//#pragma omp requires unified_shared_memory
 #endif
 
 extern uint32_t gpu_threads;
