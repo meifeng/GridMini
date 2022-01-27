@@ -150,7 +150,7 @@ int main (int argc, char ** argv)
 	 }
 #endif
 #ifdef OMP_UNROLL
-	  #pragma omp unroll factor(UNROLL_FACTOR)
+	  #pragma omp unroll patial(UNROLL_FACTOR)
 	 for(int64_t s=0;s<vol;s++)
 		 zv[s]=xv[s]*yv[s];
 #endif
