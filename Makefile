@@ -13,7 +13,7 @@ MAIN=Benchmark_su3
 
 ##Clang
 CXX=clang++
-CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart
+CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart -fno-exceptions -march=native -fopenmp-version=51 -fno-unroll-loops -fno-vectorize -llvm_info -Rpass=loop-unroll
 CXXFLAGS += -DOMPTARGET 
 CXXFLAGS +=-DOMPTARGET_MANAGED
 #CXXFLAGS += -DVECTOR_LOOPS
