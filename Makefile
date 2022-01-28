@@ -32,9 +32,9 @@ DEFS=-DGEN \
      -DRNG_RANLUX \
 #     -DSPOT_CHECK=4 #Uncomment to spot check for correctness. If SPOT_CHECK is specified with a number, that site index will be checked. Otherwise, site 1 will be checked.  
 
-#OMPTARGET_MANAGED uses cudaMallocManaged or hipMallocManaged as the memory allocator
-#OMPTARGET_MAP uses manual data copying using the "map" clauses 
-#OMPTARGET_UVM uses the built-in unified shared memory support -- NOT WORKING 
+# OMPTARGET_MANAGED uses cudaMallocManaged or hipMallocManaged as the memory allocator
+# OMPTARGET_MAP uses manual data copying using the "map" clauses 
+# OMPTARGET_UVM uses the built-in unified shared memory support -- NOT WORKING 
 
 OMPFLAGS=-DOMPTARGET -DOMPTARGET_UVM # -DOMPTARGET_MAP -DOMPTARGET_MANAGED #
 
@@ -89,13 +89,7 @@ AMDFLAGS = -std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp \
 clang-amd: $(SRCS)
 	clang++ $(INCLUDES) $(LDFLAGS) $(AMDFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o amd-$(MAIN).x
 
-#CXX=clang++ -fopenmp-version=50 -fopenmp-cuda-mode
-#CXXFLAGS=-std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=$(AMD_ARCH)
-#CXXFLAGS += -DOMPTARGET
-##CXXFLAGS += -DDEBUG
-
 ##NVCC
-#CXX=nvcc
 NVCCFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
 nvcc: $(SRCS)
 	nvcc $(NVCCFLAGS) $(INCLUDES) $(LDFLAGS) $(DEFS) $(SRCS) -o cuda-$(MAIN).x
@@ -121,51 +115,5 @@ CRAYFLAGS = -std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=
 
 cray-omp: $(SRCS)
 	CC $(INCLUDES) $(LDFLAGS) $(CRAYFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o cray-$(MAIN).x
-#CXX=CC
-#CXXFLAGS=-std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=$(NVIDIA_ARCH)
-#CXXFLAGS += -DOMPTARGET 
-#CXXFLAGS += -DOMPTARGET_MANAGED
-#CXXFLAGS += -DDEBUG
-
-INCLUDES=-I./ -I${CUDA_ROOT}/include
-LDFLAGS=-L${CUDA_ROOT}/lib64
-all:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) \
-		benchmarks/${MAIN}.cc \
-                Grid/util/Init.cc \
-                Grid/communicator/SharedMemory.cc \
-                Grid/communicator/SharedMemoryNone.cc \
-                Grid/allocator/AlignedAllocator.cc \
-                Grid/communicator/Communicator_base.cc \
-                Grid/communicator/Communicator_none.cc  \
-                Grid/log/Log.cc \
-                -o ${MAIN}.x \
-                -DGEN \
-                -DGEN_SIMD_WIDTH=16 \
-                -DHAVE_MALLOC_H \
-                -DGRID_COMMS_NONE \
-                -DGRID_DEFAULT_PRECISION_DOUBLE \
-		-DRNG_RANLUX
-
-
-llvm:
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(LDFLAGS) \
-		benchmarks/${MAIN}.cc \
-                Grid/util/Init.cc \
-                Grid/communicator/SharedMemory.cc \
-                Grid/communicator/SharedMemoryNone.cc \
-                Grid/allocator/AlignedAllocator.cc \
-                Grid/communicator/Communicator_base.cc \
-                Grid/communicator/Communicator_none.cc  \
-                Grid/log/Log.cc \
-                $(LLVMFLAGS) \
-                -DGEN \
-                -DGEN_SIMD_WIDTH=32 \
-                -DHAVE_MALLOC_H \
-                -DGRID_COMMS_NONE \
-                -DGRID_DEFAULT_PRECISION_DOUBLE \
-		-DRNG_RANLUX
-
-
 clean:
-	rm -v *.x 
+	rm -v *.x  *.o
