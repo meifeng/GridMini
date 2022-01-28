@@ -421,6 +421,7 @@ public:
   strong_inline       scalar_type * end()         { return begin() + Traits::count; }
 };
 
+//#pragma omp declare mapper (iMatrix<vComplex,Nc> m) map(m, m.
 template <class v> accelerator_inline
 void vprefetch(const iScalar<v> &vv) {
   vprefetch(vv._internal);

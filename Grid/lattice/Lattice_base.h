@@ -60,12 +60,11 @@ void accelerator_inline conformable(GridBase *lhs,GridBase *rhs)
 #define LATTICE_VIEW_STRICT
 template<class vobj> class LatticeAccelerator : public LatticeBase
 {
-protected:
+public:
   GridBase *_grid;
   int checkerboard;
   vobj     *_odata;    // A managed pointer
   uint64_t _odata_size;    
-public:
   accelerator_inline LatticeAccelerator() : checkerboard(0), _odata(nullptr), _odata_size(0), _grid(nullptr) { }; 
   accelerator_inline uint64_t oSites(void) const { return _odata_size; };
   accelerator_inline int  Checkerboard(void) const { return checkerboard; };
@@ -230,6 +229,7 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+//#pragma omp target teams distribute parallel for
     accelerator_for(ss,me.size(),1,{
       auto tmp = eval(ss,expr);
       vstream(me[ss],tmp);
@@ -249,9 +249,26 @@ public:
     this->checkerboard=cb;
 
     auto me  = View();
+    int size = me.size();
+//    printf("size:%d\n",size);
+/*
+    auto in1 = expr.arg1;
+    auto in2 = expr.arg2;
+
+int in_size = in1.size();
+auto in1_ptr = &in1[0];
+auto in2_ptr = &in2[0];
+int me_size = me.size();
+auto me_ptr = &me[0];
+*/
+
+//#pragma omp target teams distribute parallel for 
     accelerator_for(ss,me.size(),1,{
-      auto tmp = eval(ss,expr);
-      vstream(me[ss],tmp);
+      me[ss] = eval(ss,expr);
+#ifdef DEBUG  
+    if (ss==0) printf("operator= in lattice/Lattice_base.h: me[ss] = %f\n",me[ss]._internal._internal._internal.v.v[0]); 
+#endif
+      //vstream(me[ss],tmp);
     });
     return *this;
   }
@@ -284,10 +301,13 @@ public:
     CBFromExpression(cb,expr);
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
-
+int gsize = this->_grid->oSites();
     resize(this->_grid->oSites());
-
     *this = expr;
+std::cout<<"1"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1]) 
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"2"<<std::endl;
   }
   template<class Op,class T1, class T2>
   Lattice(const LatticeBinaryExpression<Op,T1,T2> & expr) {
@@ -300,9 +320,14 @@ public:
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
 
+int gsize = this->_grid->oSites();
     resize(this->_grid->oSites());
 
     *this = expr;
+std::cout<<"3"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1]) 
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"4"<<std::endl;
   }
   template<class Op,class T1, class T2, class T3>
   Lattice(const LatticeTrinaryExpression<Op,T1,T2,T3> & expr) {
@@ -315,9 +340,14 @@ public:
     assert( (cb==Odd) || (cb==Even));
     this->checkerboard=cb;
 
+int gsize = this->_grid->oSites();
     resize(this->_grid->oSites());
 
     *this = expr;
+std::cout<<"5"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1]) 
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"6"<<std::endl;
   }
 
   template<class sobj> inline Lattice<vobj> & operator = (const sobj & r){
@@ -325,6 +355,8 @@ public:
     thread_for(ss,me.size(),{
       me[ss] = r;
     });
+//std::cout<<"AA"<<std::endl;
+//#pragma omp target update to(me[0:me.size()])
     return *this;
   }
 
@@ -339,6 +371,12 @@ public:
     resize(this->_grid->oSites());
     assert((((uint64_t)&this->_odata[0])&0xF) ==0);
     this->checkerboard=0;
+int gsize=this->_grid->oSites();
+//std::cout<<"7"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1])
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+//std::cout<<"8"<<std::endl;
+
   }
   
   //  virtual ~Lattice(void) = default;
@@ -358,6 +396,12 @@ public:
     this->_grid = r.Grid();
     resize(this->_grid->oSites());
     *this = r;
+
+int gsize=this->_grid->oSites();
+std::cout<<"9"<<std::endl;
+//#pragma omp target enter data map(to:this[0:1])
+//#pragma omp target enter data map(to:this->_odata[0:gsize])
+std::cout<<"10"<<std::endl;
   }
   ///////////////////////////////////////////
   // move constructor
@@ -382,6 +426,7 @@ public:
     accelerator_for(ss,me.size(),vobj::Nsimd(),{
       coalescedWrite(me[ss],him(ss));
     });
+std::cout<<"BB"<<std::endl;
     return *this;
   }
 
@@ -396,6 +441,7 @@ public:
     accelerator_for(ss,me.size(),vobj::Nsimd(),{
       coalescedWrite(me[ss],him(ss));
     });
+std::cout<<"CC"<<std::endl;
     return *this;
   }
   ///////////////////////////////////////////
@@ -411,7 +457,8 @@ public:
 
     r._odata      = nullptr;
     r._odata_size = 0;
-    
+std::cout<<"DD"<<std::endl;
+
     return *this;
   }
 

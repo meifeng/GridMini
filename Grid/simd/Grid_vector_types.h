@@ -191,10 +191,30 @@ template <class Out, class Input1, class Input2, class Input3, class Operation>
 Out accelerator_inline  trinary(Input1 src_1, Input2 src_2, Input3 src_3, Operation op) {
   return op(src_1, src_2, src_3);
 }
+
+#include <typeinfo>
+#if 1
 template <class Out, class Input1, class Input2, class Operation>
 Out accelerator_inline binary(Input1 src_1, Input2 src_2, Operation op) {
-  return op(src_1, src_2);
+#ifdef DEBUG
+//printf("binary\n");
+#endif
+//printf("op()=%f\n",op(src_1,src_2).v[0]);
+//printf("%s\n", typeid(Out).name());
+//if(typeid(Out).name()=="N4Grid12Optimization3vecIdEE") printf("%f\n",op(src_1,src_2).v[0]);
+      	return op(src_1,src_2);
 }
+
+#endif
+
+template <class Out, class Input1, class Input2, class Operation>
+accelerator_inline auto mybinary(Input1 src_1, Input2 src_2, Operation op)->decltype(op(src_1,src_2)) {
+#ifdef DEBUG
+printf("mybinary\n");
+#endif
+  return op(src_1,src_2);
+}
+
 template <class Out, class Input, class Operation>
 Out accelerator_inline  unary(Input src, Operation op) {
   return op(src);
@@ -226,6 +246,9 @@ public:
 
   accelerator_inline Grid_simd &operator=(const Grid_simd &&rhs) {
     v = rhs.v;
+ #ifdef DEBUG
+    //printf("operator= in simd/Grid_vector_types.h: rhs.v.v[0]=%e, v.v[0]=%e\n",rhs.v,v);
+ #endif
     return *this;
   };
   accelerator_inline Grid_simd &operator=(const Grid_simd &rhs) {
@@ -269,6 +292,7 @@ public:
 				      const Grid_simd *__restrict__ l,
 				      const Grid_simd *__restrict__ r) {
     *y = (*l) * (*r);
+//     *y = mymult((*l), (*r));
   }
 
   friend accelerator_inline void sub(Grid_simd *__restrict__ y,
@@ -731,6 +755,10 @@ template <class S, class V, IfComplex<S> = 0>
 accelerator_inline Grid_simd<S, V> operator*(Grid_simd<S, V> a, Grid_simd<S, V> b) {
   Grid_simd<S, V> ret;
   ret.v = binary<V>(a.v, b.v, MultComplexSIMD());
+  //printf("s %lu\n", sizeof(a.v));
+#ifdef DEBUG
+  printf("a.v = %f, b.v = %f, ret.v = %f\n", a.v.v[0], b.v.v[0], ret.v.v[0]);
+#endif
   return ret;
 };
 
@@ -738,9 +766,24 @@ accelerator_inline Grid_simd<S, V> operator*(Grid_simd<S, V> a, Grid_simd<S, V> 
 template <class S, class V, IfNotComplex<S> = 0>
 accelerator_inline Grid_simd<S, V> operator*(Grid_simd<S, V> a, Grid_simd<S, V> b) {
   Grid_simd<S, V> ret;
+//  VECTOR_FOR(i, ret.v.size, 1) 
+//  {
+    //printf("v.size=%d\n",ret.v.size);	  
+//    ret.v.v[i] = a.v.v[i]*b.v.v[i];
+//  }
   ret.v = binary<V>(a.v, b.v, MultSIMD());
+#ifdef DEBUG
+  printf("operator * in Grid_vector_types.h: a.v = %f, b.v = %f, ret.v = %f\n", a.v.v[0], b.v.v[0], ret.v.v[0]);
+#endif
   return ret;
 };
+
+template <class S, class V, IfNotComplex<S> = 0>
+accelerator_inline Grid_simd<S, V> mymult(Grid_simd<S, V> &a, Grid_simd<S, V> &b) {
+  Grid_simd<S, V> ret; 
+  ret.v = binary<V>(a.v, b.v, MultSIMD());
+  return ret;
+}
 
 // Distinguish between complex types and others
 template <class S, class V, IfComplex<S> = 0>

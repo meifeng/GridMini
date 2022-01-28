@@ -29,6 +29,7 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #ifndef GRID_ALIGNED_ALLOCATOR_H
 #define GRID_ALIGNED_ALLOCATOR_H
 
+#include <Grid/threads/Pragmas.h>
 #ifdef HAVE_MALLOC_MALLOC_H
 #include <malloc/malloc.h>
 #endif
@@ -43,7 +44,13 @@ Author: Peter Boyle <paboyle@ph.ed.ac.uk>
 #define POINTER_CACHE
 #define GRID_ALLOC_ALIGN (2*1024*1024)
 
+#ifdef OMPTARGET_MANAGED
+#include <cuda_runtime_api.h>
+#endif
 NAMESPACE_BEGIN(Grid);
+
+
+extern "C" void *llvm_omp_target_alloc_shared(size_t,int);
 
 // Move control to configure.ac and Config.h?
 #ifdef POINTER_CACHE
@@ -165,7 +172,7 @@ public:
     pointer ptr = nullptr;
 #endif
 
-#ifdef GRID_NVCC
+#if defined(GRID_NVCC) || defined (OMPTARGET_MANAGED)
     ////////////////////////////////////
     // Unified (managed) memory
     ////////////////////////////////////
@@ -178,6 +185,11 @@ public:
       }
     }
     assert( ptr != (_Tp *)NULL);
+    //cudaMemAdvise ( (void*)ptr, bytes, cudaMemAdviseSetPreferredLocation, 0);
+#elif defined (OMPTARGET_UVM)
+    const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
+    if ( ptr == (_Tp *) NULL ) ptr = (_Tp *) omp_target_alloc(bytes, device_id);
+    std::cout <<"OMPTARGET_UVM"<<std::endl;
 #else 
     //////////////////////////////////////////////////////////////////////////////////////////
     // 2MB align; could make option probably doesn't need configurability
@@ -189,6 +201,13 @@ public:
   #endif
     assert( ptr != (_Tp *)NULL);
 
+//FIXME: NOT WORKING
+//#ifdef OMPTARGET
+//#pragma omp target enter data map(alloc:ptr[0:__n])
+//for(int n=0;n<__n;n++){
+//#pragma omp target enter data map(alloc:ptr[n][0:sizeof(_Tp)])
+//}
+//#endif 
     //////////////////////////////////////////////////
     // First touch optimise in threaded loop 
     //////////////////////////////////////////////////
@@ -211,14 +230,26 @@ public:
     pointer __freeme = __p;
 #endif
 
-#ifdef GRID_NVCC
+#if defined(GRID_NVCC) || defined (OMPTARGET_MANAGED)
     if ( __freeme ) cudaFree((void *)__freeme);
+
+#elif defined (OMPTARGET_UVM) 
+    const int device_id = (omp_get_num_devices() > 0) ? omp_get_default_device() : omp_get_initial_device();
+    omp_target_free(__freeme, device_id );
+
 #else 
   #ifdef HAVE_MM_MALLOC_H
     if ( __freeme ) _mm_free((void *)__freeme); 
   #else
     if ( __freeme ) free((void *)__freeme);
   #endif
+
+//FIXME: NOT WORKING
+//for(int n=0;n<__n;n++){
+//#pragma omp target exit data map(delete:__freeme[n][0:sizeof(_Tp)])
+//}    
+//#pragma omp target exit data map(delete:__freeme[0:__n])
+
 #endif
   }
 

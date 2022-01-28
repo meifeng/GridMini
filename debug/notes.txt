@@ -1,0 +1,13 @@
+LLVM/11.0 Tests
+----------------------------------------
+test-float-2 & test-template-2 CORRECT
+test-float & test-template WRONG
+test-float-pointer CORRECT
+test-float-class   WRONG
+
+CCE 9.0 Tests All CORRECT
+----------------------------------------
+gcc/7.3.0
+cudatoolkit/10.0.130_3.22-7.0.0.1_3.3__gdfb4ce5
+PrgEnv-cray/6.0.5
+cce/9.0.0

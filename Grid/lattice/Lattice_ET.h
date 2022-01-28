@@ -83,17 +83,26 @@ struct getVectorType<Lattice<T> >{
 template<class sobj> accelerator_inline 
 sobj eval(const uint64_t ss, const sobj &arg)
 {
+#ifdef DEBUG
+printf("Lattice_ET.h: eval(const uint64_t ss, const sobj &arg)\n");
+#endif
   return arg;
 }
 
 template <class lobj> accelerator_inline 
 const lobj & eval(const uint64_t ss, const LatticeView<lobj> &arg) 
 {
+#ifdef DEBUG
+printf("Lattice_ET.h: eval(const uint64_t ss, const LatticeView<lobj> &arg)\n");
+#endif
   return arg[ss];
 }
 template <class lobj> accelerator_inline 
 const lobj & eval(const uint64_t ss, const Lattice<lobj> &arg) 
 {
+#ifdef DEBUG
+printf("Lattice_ET.h: eval(const uint64_t ss, const Lattice<lobj> &arg)\n");
+#endif 
   auto view = arg.View();
   return view[ss];
 }
@@ -114,6 +123,12 @@ template <typename Op, typename T1, typename T2> accelerator_inline
 auto eval(const uint64_t ss, const LatticeBinaryExpression<Op, T1, T2> &expr)  
   -> decltype(expr.op.func( eval(ss,expr.arg1),eval(ss,expr.arg2)))
 {
+#ifdef DEBUG
+  printf("eval in lattice/Lattice_ET.h: expr.arg1=%f\n",expr.arg1[ss]._internal._internal._internal.v.v[0]);
+  printf("eval in lattice/Lattice_ET.h: expr.arg2=%f\n",expr.arg2[ss]._internal._internal._internal.v.v[0]);
+  auto tmp=expr.op.func( eval(ss,expr.arg1), eval(ss,expr.arg2) );
+  printf("eval in lattice/Lattice_ET.h: eval= %f\n",tmp._internal._internal._internal.v.v[0]);
+#endif
   return expr.op.func( eval(ss,expr.arg1), eval(ss,expr.arg2) );
 }
 ///////////////////////

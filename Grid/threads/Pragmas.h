@@ -28,6 +28,8 @@ Author: paboyle <paboyle@ph.ed.ac.uk>
 /*  END LEGAL */
 #pragma once
 
+#include <stdint.h>
+
 #ifndef MAX
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #define MIN(x,y) ((x)>(y)?(y):(x))
@@ -124,6 +126,31 @@ void LambdaApplySIMT(uint64_t Isites, uint64_t Osites, lambda Lambda)
 #define accelerator_for( iterator, num, nsimd, ... )		\
   accelerator_forNB(iterator, num, nsimd, { __VA_ARGS__ } );	\
   accelerator_barrier(dummy);
+
+#elif defined (OMPTARGET)
+#ifdef OMPTARGET_UVM
+//#pragma omp requires unified_shared_memory
+#endif
+
+extern uint32_t gpu_threads;
+#define accelerator 
+#define accelerator_inline strong_inline
+#define accelerator_for(iterator,num,nsimd, ... )  \
+{                                                  \
+	uint32_t nteams=(num+gpu_threads-1)/gpu_threads;  \
+       	_Pragma("omp target teams distribute parallel for thread_limit(gpu_threads)") \
+	naked_for(iterator, num, { __VA_ARGS__ }); \
+  }
+#define accelerator_forNB(iterator,num,nsimd, ... ) accelerator_for(iterator,num,nsimd, {__VA_ARGS__} )
+
+#define accelerator_barrier(dummy) 
+
+#elif defined (_OPENACC)
+
+#define accelerator
+#define accelerator_inline strong_inline
+#define accelerator_for(iterator,num,nsimd, ... )   _Pragma("acc parallel loop independent") naked_for(iterator, num, { __VA_ARGS__ });
+#define accelerator_forNB(iterator,num,nsimd, ... ) _Pragma("acc parallel loop independent") naked_for(iterator, num, { __VA_ARGS__ });
 
 #else
 
