@@ -49,3 +49,6 @@ You can specify the number of GPU threads in a thread block through the *--gpu-t
 > prefix-Benchmark_su3.x --gpu-threads 128 
 
 If you don't provide --gpu-threads argument, it will use the default value, which is 8. 
+
+If your system uses Slurm as the workload manager, you may need to launch the executable with *srun*, such as the following
+> srun prefix-Benchmark_su3.x 
