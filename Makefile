@@ -11,6 +11,7 @@ MAIN=Benchmark_su3
 #CXX=pgc++
 #CXXFLAGS=-fast --c++14 -acc -Mnollvm -Minfo=accel -ta=tesla:cc70,managed -Mlarge_arrays --no_exceptions
 
+## Add flags for forcing no compiler-automated loop unroll
 ##Clang
 CXX=clang++
 CXXFLAGS=-std=c++14 -g -fopenmp -fopenmp-cuda-mode  -O3 -fopenmp-targets=nvptx64-nvidia-cuda -lcudart -fno-exceptions -march=native -fopenmp-version=51 -fno-unroll-loops -fno-vectorize -llvm_info -Rpass=loop-unroll
