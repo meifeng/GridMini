@@ -36,7 +36,7 @@ DEFS=-DGEN \
 # OMPTARGET_MAP uses manual data copying using the "map" clauses 
 # OMPTARGET_UVM uses the built-in unified shared memory support -- NOT WORKING 
 
-OMPFLAGS=-DOMPTARGET -DOMPTARGET_UVM # -DOMPTARGET_MAP -DOMPTARGET_MANAGED #
+OMPFLAGS=-DOMPTARGET -DOMPTARGET_MAP -DOMPTARGET_MANAGED #-DOMPTARGET_UVM
 
 
 ##xlC
@@ -95,7 +95,7 @@ nvcc: $(SRCS)
 	nvcc $(NVCCFLAGS) $(INCLUDES) $(LDFLAGS) $(DEFS) $(SRCS) -o cuda-$(MAIN).x
 
 ##NVC++ for OpenMP offloading
-NVOMPFLAGS = -std=c++14 -mp=gpu -gpu=cc70 -cuda  -Minfo=accel
+NVOMPFLAGS = -std=c++14 -mp=gpu -gpu=cc70 -cuda  -Minfo=all
 nv-omp: $(SRCS)
 	nvc++ $(INCLUDES) $(LDFLAGS) $(NVOMPFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o nvhpc-$(MAIN).x
 
