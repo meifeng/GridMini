@@ -38,9 +38,9 @@ MAIN=Benchmark_su3
 
 
 ##AOMP Clang - AMD GPU
-#CXX=clang++ -fopenmp-version=50 -fopenmp-cuda-mode
-#CXXFLAGS=-std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx906
-#CXXFLAGS += -DOMPTARGET
+#CXX=amdclang++ -fopenmp-version=50 -fopenmp-cuda-mode
+#CXXFLAGS=-std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx90a
+#CXXFLAGS += -DOMPTARGET -DOMPTARGET_MANAGED
 ##CXXFLAGS += -DDEBUG
 
 ##NVCC
@@ -49,7 +49,7 @@ MAIN=Benchmark_su3
 
 ##HIPCC
 CXX=hipcc
-CXXFLAGS= -I. -std=c++14 --amdgpu-target=gfx906
+CXXFLAGS= -I. -std=c++14 --amdgpu-target=gfx90a
 
 ##HIPCC for NVIDIA 
 #CXX=hipcc
