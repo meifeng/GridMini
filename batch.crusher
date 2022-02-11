@@ -1,0 +1,18 @@
+#!/bin/bash
+
+ 
+
+#SBATCH -A lgt104_crusher
+#SBATCH -p batch
+#SBATCH -N 1
+#SBATCH -t 2:00:00
+#SBATCH -J hipcc-hipmanaged-su3
+#SBATCH -o %x-%j.out
+
+ 
+
+echo "==============================="
+echo "Running OpenMP offloading benchmark"
+echo "==============================="
+cat Makefile
+srun -n1 ./Benchmark_su3.x --gpu-threads 8
