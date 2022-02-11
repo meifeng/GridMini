@@ -28,7 +28,6 @@ Author: Peter Boyle <peterboyle@Peters-MacBook-Pro-2.local>
     /*  END LEGAL */
 #include <Grid/GridCore.h>
 #include <Grid/GridStd.h>
-#include <cuda_profiler_api.h>
 using namespace std;
 using namespace Grid;
 
@@ -165,13 +164,11 @@ int64_t Nloop=1000;
       }
 
 
-      cudaProfilerStart();
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
 	z=x*y;
       }
       double stop=usecond();
-      cudaProfilerStop();
       double time = (stop-start)/Nloop*1000.0;
       
       double bytes=3*vol*Nc*Nc*sizeof(Complex);
