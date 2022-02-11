@@ -1,6 +1,6 @@
 GPUARCH=-m64 -gencode arch=compute_70,code=sm_70
 NVIDIA_ARCH=sm_70 #change to the target NVIDIA GPU arch
-AMD_ARCH=gfx908   #change to the target AMD GPU arch
+AMD_ARCH=gfx90a   #change to the target AMD GPU arch
 
 
 MAIN=Benchmark_su3
@@ -36,7 +36,7 @@ DEFS=-DGEN \
 # OMPTARGET_MAP uses manual data copying using the "map" clauses 
 # OMPTARGET_UVM uses the built-in unified shared memory support -- NOT WORKING 
 
-OMPFLAGS=-DOMPTARGET -DOMPTARGET_MAP -DOMPTARGET_MANAGED #-DOMPTARGET_UVM
+OMPFLAGS=-DOMPTARGET -DOMPTARGET_MAP #-DOMPTARGET_MANAGED #-DOMPTARGET_UVM
 
 
 ##xlC
@@ -87,7 +87,7 @@ AMDFLAGS = -std=c++14 -O3 -target x86_64-pc-linux-gnu -fopenmp \
 	   -march=$(AMD_ARCH) \
 	   -fopenmp-cuda-mode 
 clang-amd: $(SRCS)
-	clang++ $(INCLUDES) $(LDFLAGS) $(AMDFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o amd-$(MAIN).x
+	amdclang++ $(INCLUDES) $(LDFLAGS) $(AMDFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o amd-$(MAIN).x
 
 ##NVCC
 NVCCFLAGS=--x cu ${GPUARCH} -I. -ccbin g++ -rdc=true --expt-extended-lambda --expt-relaxed-constexpr -std=c++14
