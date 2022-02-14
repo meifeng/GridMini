@@ -31,6 +31,15 @@ Author: Peter Boyle <peterboyle@Peters-MacBook-Pro-2.local>
 using namespace std;
 using namespace Grid;
 
+
+#define TILE_SZ 4
+
+#define UNROLL_FACTOR 2
+
+#define TILE
+#define UNROLL
+//#define OMP_TILE
+//#define OMP_UNROLL
 int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
@@ -132,8 +141,33 @@ int main (int argc, char ** argv)
 
       for(int64_t i=0;i<Nloop;i++){
       #pragma omp target teams distribute parallel for
-	for(int64_t s=0;s<vol;s++){
-          zv[s]=xv[s]*yv[s];
+
+	      
+#ifdef UNROLL
+	 for(int64_t s=0;s<vol;s+=UNROLL_FACTOR) { 
+		 zv[s]=xv[s]*yv[s];
+		 zv[s+1]=xv[s+1]*yv[s+1];
+	 }
+#endif
+#ifdef OMP_UNROLL
+	  #pragma omp unroll partial(UNROLL_FACTOR)
+	 for(int64_t s=0;s<vol;s++)
+		 zv[s]=xv[s]*yv[s];
+#endif
+
+
+#ifdef TILE
+	 for(int64_t s=0;s<vol;s+=TILE_SZ) {
+          for (int64_t t = s; t< min(s+TILE_SZ, vol); t++)
+             zv[t]=xv[t]*yv[t];
+	 }
+#endif
+	      
+#ifdef OMP_TILE
+	  #pragma omp tile sizes(TILE_SZ)
+	 for(int64_t s=0;s<vol;s++)
+		 zv[s]=xv[s]*yv[s];
+#endif
         }
       }
 
