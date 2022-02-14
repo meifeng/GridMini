@@ -36,6 +36,7 @@ Author: paboyle <paboyle@ph.ed.ac.uk>
 #define strong_inline     __attribute__((always_inline)) inline
 #define UNROLL  _Pragma("unroll")
 
+#define OMP_UROLL_FACT 4
 //////////////////////////////////////////////////////////////////////////////////
 // New primitives; explicit host thread calls, and accelerator data parallel calls
 //////////////////////////////////////////////////////////////////////////////////
@@ -132,13 +133,15 @@ extern uint32_t gpu_threads;
 #define accelerator_for(iterator,num,nsimd, ... )  \
 {                                                  \
 	uint32_t nteams=(num+gpu_threads-1)/gpu_threads;  \
-       	_Pragma("omp target teams distribute parallel for num_teams(nteams) thread_limit(gpu_threads)") \
+	uint32_t unroll_factor = OMP_UROLL_FACT;
+       	_Pragma("omp target teams distribute parallel for num_teams(nteams) thread_limit(gpu_threads) unroll partial(unroll_factor)") \
 	naked_for(iterator, num, { __VA_ARGS__ }); \
   }
 #define accelerator_forNB(iterator,num,nsimd, ... ) \
   {						    \
   	uint32_t nteams=(num+gpu_threads-1)/gpu_threads;  \
-        _Pragma("omp target teams distribute parallel for num_teams(nteams) thread_limit(gpu_threads)") \
+	uint32_t unroll_factor = OMP_UROLL_FACT;
+        _Pragma("omp target teams distribute parallel for num_teams(nteams) thread_limit(gpu_threads) unroll partial(unroll_factor)") \
         naked_for(iterator, num, { __VA_ARGS__ }); \
   }
 
