@@ -111,9 +111,15 @@ gcc-omp: $(SRCS)
 #CXXFLAGS=-std=c++14 -O3 -fopenmp -foffload=nvptx-none -DOMPTARGET #-DOMPTARGET_MANAGED -DDEBUG -lcudart
 
 ##CRAY CCE
-CRAYFLAGS = -std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=$(NVIDIA_ARCH)
+CCNVFLAGS = -std=c++14 -fopenmp -fopenmp-targets=nvptx64 -Xopenmp-target -march=$(NVIDIA_ARCH)
 
-cray-omp: $(SRCS)
-	CC $(INCLUDES) $(LDFLAGS) $(CRAYFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o cray-$(MAIN).x
+cray-nvidia: $(SRCS)
+	CC $(INCLUDES) $(LDFLAGS) $(CCNVFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o cray-$(MAIN).x
+
+CCAMDFLAGS = -std=c++14 -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target -march=$(AMD_ARCH)
+
+cray-amd: $(SRCS)
+	CC $(INCLUDES) $(LDFLAGS) $(CCAMDFLAGS) $(OMPFLAGS) $(DEFS) $(SRCS) -o cray-$(MAIN).x
+
 clean:
 	rm -v *.x  *.o
