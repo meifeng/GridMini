@@ -202,7 +202,12 @@ int64_t Nloop=1000;
 
           for(int64_t s = ss+ 13*TILE_SIZE; s < ss+14*TILE_SIZE; s++)
             zv[s]=xv[s]*yv[s];
-
+		
+        for(int64_t s = ss+ 14*TILE_SIZE; s < ss+15*TILE_SIZE; s++)
+            zv[s]=xv[s]*yv[s];
+         for(int64_t s = ss+ 15*TILE_SIZE; s < ss+16*TILE_SIZE; s++)
+            zv[s]=xv[s]*yv[s];
+		
         }
 
 #else
@@ -211,8 +216,6 @@ int64_t Nloop=1000;
         for(int64_t ss=0; ss<vol; ss += TILE_SIZE) {
           for(int64_t s = ss; s < ss + TILE_SIZE; s += UNROLL_FACTOR)
             {
-
-
             zv[s]=xv[s]*yv[s];
             zv[s+1] = xv[s+1]*yv[s+1];
             zv[s+2] = xv[s+2]*yv[s+2];
