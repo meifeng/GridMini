@@ -160,80 +160,15 @@ int64_t Nloop=1000;
 #ifdef UNROLL_TILE
 
       #pragma omp target teams distribute parallel for thread_limit(gpu_threads) unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE)
-        for(int64_t ss=0;ss<vol;ss+=TILE_SIZE*UNROLL_FACTOR) {
-
-          for(int64_t s = ss; s < ss+TILE_SIZE; s++)
+        for(int64_t s=0;s<vol;s++) { 
             zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ TILE_SIZE; s < ss+ 2*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss + 2*TILE_SIZE; s < ss+3*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 3*TILE_SIZE; s < ss+4*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 4*TILE_SIZE; s < ss+5*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 5*TILE_SIZE; s < ss+6*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 6*TILE_SIZE; s < ss+7*TILE_SIZE; s++)
-		  
-          for(int64_t s = ss+ 7*TILE_SIZE; s < ss+8*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 8*TILE_SIZE; s < ss+9*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 9*TILE_SIZE; s < ss+10*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 10*TILE_SIZE; s < ss+11*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 11*TILE_SIZE; s < ss+12*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 12*TILE_SIZE; s < ss+13*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 13*TILE_SIZE; s < ss+14*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-		
-        for(int64_t s = ss+ 14*TILE_SIZE; s < ss+15*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-         for(int64_t s = ss+ 15*TILE_SIZE; s < ss+16*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-		
         }
 
 #else
 
 #pragma omp target teams distribute parallel for thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR)
-        for(int64_t ss=0; ss<vol; ss += TILE_SIZE) {
-          for(int64_t s = ss; s < ss + TILE_SIZE; s += UNROLL_FACTOR)
-            {
-            zv[s]=xv[s]*yv[s];
-            zv[s+1] = xv[s+1]*yv[s+1];
-            zv[s+2] = xv[s+2]*yv[s+2];
-            zv[s+3] =  xv[s+3]*yv[s+3];
-            zv[s+4] = xv[s+4]*yv[s+4];
-            zv[s+5] = xv[s+5]*yv[s+5];
-            zv[s+6] = xv[s+6]*yv[s+6];
-            zv[s+7] = xv[s+7]*yv[s+7];
-            zv[s+8] = xv[s+8]*yv[s+8];
-            zv[s+9] = xv[s+9]*yv[s+9];
-            zv[s+10] =  xv[s+10]*yv[s+10];
-            zv[s+11] = xv[s+11]*yv[s+11];
-            zv[s+12] = xv[s+12]*yv[s+12];
-            zv[s+13] = xv[s+13]*yv[s+13];
-            zv[s+14] =  xv[s+14]*yv[s+14];
-            zv[s+15] =  xv[s+15]*yv[s+15];
-
-            }
+        for(int64_t s=0; s<vol; s++) {
+		zv[s]=xv[s]*yv[s]; 
         }
       #endif
       }
@@ -244,95 +179,18 @@ int64_t Nloop=1000;
 #ifdef UNROLL_TILE
 
       #pragma omp target teams distribute parallel for thread_limit(gpu_threads) unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE)
-        for(int64_t ss=0;ss<vol;ss += TILE_SIZE*UNROLL_FACTOR) {
-
-          for(int64_t s = ss; s < ss + TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ TILE_SIZE; s < ss + 2*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-	  for(int64_t s = ss + 2*TILE_SIZE; s < ss + 3*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 3*TILE_SIZE; s < ss+4*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-		
-		
-		
-          for(int64_t s = ss+ 4*TILE_SIZE; s < ss+5*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 5*TILE_SIZE; s < ss+6*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 6*TILE_SIZE; s < ss+7*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 7*TILE_SIZE; s < ss+8*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 8*TILE_SIZE; s < ss+9*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 9*TILE_SIZE; s < ss+10*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 10*TILE_SIZE; s < ss+11*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 11*TILE_SIZE; s < ss+12*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 12*TILE_SIZE; s < ss+13*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 13*TILE_SIZE; s < ss+14*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 14*TILE_SIZE; s < ss+15*TILE_SIZE; s++)
-            zv[s]=xv[s]*yv[s];
-
-          for(int64_t s = ss+ 15*TILE_SIZE; s < ss+16*TILE_SIZE; s++)
+        for(int64_t s=0;s<vol;s ++) {
             zv[s]=xv[s]*yv[s];
       }
 
 #else
 
 #pragma omp target teams distribute parallel for thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR)
-      for(int64_t ss=0;ss<vol;ss+=TILE_SIZE) {
-        for(int64_t s = ss; s < ss+TILE_SIZE; s+=UNROLL_FACTOR)
-          {
-            zv[s]=xv[s]*yv[s];
-            zv[s+1] = xv[s+1]*yv[s+1];
-            zv[s+2] = xv[s+2]*yv[s+2];
-            zv[s+3] =  xv[s+3]*yv[s+3];
-
-            zv[s+4]=xv[s+4]*yv[s+4];
-            zv[s+5] = xv[s+5]*yv[s+5];
-            zv[s+6] = xv[s+6]*yv[s+6];
-
-            zv[s+7]=xv[s+7]*yv[s+7];
-            zv[s+8] = xv[s+8]*yv[s+8];
-            zv[s+9] = xv[s+9]*yv[s+9];
-            zv[s+10] =  xv[s+10]*yv[s+10];
-            zv[s+11]=xv[s+11]*yv[s+11];
-            zv[s+6] = xv[s+6]*yv[s+6];
-
-            zv[s+7]=xv[s+7]*yv[s+7];
-            zv[s+8] = xv[s+8]*yv[s+8];
-            zv[s+9] = xv[s+9]*yv[s+9];
-            zv[s+10] =  xv[s+10]*yv[s+10];
-            zv[s+11]=xv[s+11]*yv[s+11];
-            zv[s+12] = xv[s+12]*yv[s+12];
-            zv[s+13] = xv[s+13]*yv[s+13];
-            zv[s+14] =  xv[s+14]*yv[s+14];
-            zv[s+15] =  xv[s+15]*yv[s+15];
-          }
-
+      for(int64_t s=0;s<vol;s++) {
+      	zv[s]=xv[s]*yv[s];
       }
       #endif
-      }
+      }  
 
       double stop=usecond();
        #pragma omp target exit data map (from:zv._odata[ :zv.size()])
