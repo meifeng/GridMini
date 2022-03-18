@@ -26,6 +26,9 @@ Author: Peter Boyle <peterboyle@Peters-MacBook-Pro-2.local>
     See the full license in the file "LICENSE" in the top level distribution directory
     *************************************************************************************/
     /*  END LEGAL */
+
+ *************************************************************************************/
+    /*  END LEGAL */
 #include <Grid/GridCore.h>
 #include <Grid/GridStd.h>
 using namespace std;
@@ -33,16 +36,21 @@ using namespace Grid;
 #ifdef OMPTARGET_UVM
 #pragma omp requires unified_shared_memory
 #endif
+
+//#define TILE_UNROLL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+#define UNROLL_TILE
+#define TILE_SIZE 64
+#define UNROLL_FACTOR 16
 int main (int argc, char ** argv)
 {
   Grid_init(&argc,&argv);
 
 #define LMAX (48)
-#define LMIN (8)
-#define LADD (8)
+#define LMIN (4)
+#define LADD (4)
 int64_t Nwarm=50;
 int64_t Nloop=1000;
- 
+
   Coordinate simd_layout = GridDefaultSimd(Nd,vComplex::Nsimd());
   std::cout<<GridLogMessage << "Grid simd_layout" << simd_layout << std::endl;
   Coordinate mpi_layout  = GridDefaultMpi();
@@ -71,20 +79,19 @@ int64_t Nloop=1000;
       LatticeColourMatrix y(&Grid); random(pRNG,y);
 
       for(int64_t i=0;i<Nwarm;i++){
-	x=x*y;
+        x=x*y;
       }
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
-	x=x*y;
+        x=x*y;
       }
       double stop=usecond();
       double time = (stop-start)/Nloop*1000.0;
-      std::cout<<"time: "<<time<<std::endl; 
+      std::cout<<"time: "<<time<<std::endl;
       double bytes=3.0*vol*Nc*Nc*sizeof(Complex);
       double footprint=2.0*vol*Nc*Nc*sizeof(Complex);
       double flops=Nc*Nc*(6.0+8.0+8.0)*vol;
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<footprint<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
-
     }
 
 #endif
@@ -110,77 +117,99 @@ int64_t Nloop=1000;
       auto xv=x.View();
       auto yv=y.View();
       auto zv=z.View();
-#ifdef SPOT_CHECK 
-      LatticeColourMatrix zref(&Grid); 
+#ifdef SPOT_CHECK
+      LatticeColourMatrix zref(&Grid);
       auto zref_v=zref.View();
-      
+
       std::cout<<"SPOT_CHECK mode...."<<std::endl;
-     
-      //CPU calculation
+
+      //CPU calculation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
       printf("=====Beginning reference CPU calculations=====\n");
       for(int64_t s=0;s<vol;s++) {
         zref_v[s]=xv[s]*yv[s];
       }
       printf("=====End reference CPU calculations=====\n");
-     
-      
+
+
       printf("=====Beginning GPU calculations=====\n");
-      //expression template calculation if enabled
+      //expression template calculation if enabled                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
       z=x*y;
       printf("=====End GPU calculations=====\n");
-      
+
      LatticeColourMatrix diff(&Grid);
      diff=z-zref;
      auto dv=diff.View();
-     int s=SPOT_CHECK; 
+     int s=SPOT_CHECK;
      if (s >= vol) {
-	     std::cout<<"Spot check failed; index out of bound"<<std::endl;
-     	     return -1;
+             std::cout<<"Spot check failed; index out of bound"<<std::endl;
+             return -1;
      }
      std::cout<<"s="<<s<<": CPU-GPU = "<<dv[s]<<std::endl;
      std::cout<<"s="<<s<<": GOT:" <<zv[s]<<" \n EXPECTED: "<<zref_v[s]<<std::endl;
-     
+
 
 #endif
 
-#if defined (OMPTARGET)  && defined (OMPTARGET_MAP) 
+#if defined (OMPTARGET)  && defined (OMPTARGET_MAP)
      #pragma omp target enter data map(alloc:zv._odata[ :zv.size()]) \
                                     map(to:xv._odata[ :xv.size()]) \
                                     map(to:yv._odata[ :yv.size()])
 
       for(int64_t i=0;i<Nwarm;i++){
-     #pragma omp target teams distribute parallel for thread_limit(gpu_threads)
-      for(int64_t s=0;s<vol;s++) {
-        zv[s]=xv[s]*yv[s];
-      }
-      }
 
+#ifdef UNROLL_TILE
+
+      #pragma omp target teams distribute parallel for thread_limit(gpu_threads) unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE)
+        for(int64_t s=0;s<vol;s++) { 
+            zv[s]=xv[s]*yv[s];
+        }
+
+#else
+
+#pragma omp target teams distribute parallel for thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR)
+        for(int64_t s=0; s<vol; s++) {
+		zv[s]=xv[s]*yv[s]; 
+        }
+      #endif
+      }
 
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
-      #pragma omp target teams distribute parallel for thread_limit(gpu_threads)
+
+#ifdef UNROLL_TILE
+
+      #pragma omp target teams distribute parallel for thread_limit(gpu_threads) unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE)
+        for(int64_t s=0;s<vol;s ++) {
+            zv[s]=xv[s]*yv[s];
+      }
+
+#else
+
+#pragma omp target teams distribute parallel for thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR)
       for(int64_t s=0;s<vol;s++) {
-        zv[s]=xv[s]*yv[s];
+      	zv[s]=xv[s]*yv[s];
       }
-      }
+      #endif
+      }  
+
       double stop=usecond();
        #pragma omp target exit data map (from:zv._odata[ :zv.size()])
        #pragma omp target exit data map (delete:yv._odata[ :yv.size()])
        #pragma omp target exit data map (delete:xv._odata[ :xv.size()])
 #else
       for(int64_t i=0;i<Nwarm;i++){
-	z=x*y;
+        z=x*y;
       }
 
 
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
-	z=x*y;
+        z=x*y;
       }
       double stop=usecond();
 #endif
       double time = (stop-start)/Nloop*1000.0;
-      
+
       double bytes=3*vol*Nc*Nc*sizeof(Complex);
       double flops=Nc*Nc*(6+8+8)*vol;
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
@@ -208,16 +237,16 @@ int64_t Nloop=1000;
       LatticeColourMatrix y(&Grid); random(pRNG,y);
 
       for(int64_t i=0;i<Nwarm;i++){
-	mult(z,x,y);
+        mult(z,x,y);
       }
-      double start=usecond();
+  double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
-	mult(z,x,y);
-	//	mac(z,x,y);
+        mult(z,x,y);
+        //      mac(z,x,y);                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
       }
       double stop=usecond();
       double time = (stop-start)/Nloop*1000.0;
-      
+
       double bytes=3*vol*Nc*Nc*sizeof(Complex);
       double flops=Nc*Nc*(6+8+8)*vol;
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"    \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
@@ -243,22 +272,22 @@ int64_t Nloop=1000;
       LatticeColourMatrix y(&Grid); random(pRNG,y);
 
       for(int64_t i=0;i<Nwarm;i++){
-	mac(z,x,y);
+        mac(z,x,y);
       }
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
-	mac(z,x,y);
+        mac(z,x,y);
       }
       double stop=usecond();
       double time = (stop-start)/Nloop*1000.0;
-      
+
       double bytes=4*vol*Nc*Nc*sizeof(Complex);
       double flops=Nc*Nc*(8+8+8)*vol;
       std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"   \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
 
     }
 
-#endif 
+#endif
 
 #if 0
   std::cout<<GridLogMessage << "===================================================================================================="<<std::endl;
@@ -267,6 +296,7 @@ int64_t Nloop=1000;
   std::cout<<GridLogMessage << "  L  "<<"\t\t"<<"bytes"<<"\t\t\t"<<"GB/s\t\t GFlop/s"<<std::endl;
   std::cout<<GridLogMessage << "----------------------------------------------------------"<<std::endl;
 
+  for(int lat=LMIN;lat<=LMAX;lat+=LADD){
   for(int lat=LMIN;lat<=LMAX;lat+=LADD){
 
       std::vector<int> latt_size  ({lat*mpi_layout[0],lat*mpi_layout[1],lat*mpi_layout[2],lat*mpi_layout[3]});
@@ -280,17 +310,16 @@ int64_t Nloop=1000;
       LatticeColourMatrix y(&Grid); random(pRNG,y);
 
       for(int mu=0;mu<4;mu++){
-	      double start=usecond();
-	      for(int64_t i=0;i<Nloop;i++){
-	        z = PeriodicBC::CovShiftForward(x,mu,y);
-	    }
-	    double stop=usecond();
-	    double time = (stop-start)/Nloop*1000.0;
-	
-	
-	    double bytes=3*vol*Nc*Nc*sizeof(Complex);
-	    double flops=Nc*Nc*(6+8+8)*vol;
-	    std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"   \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
+              double start=usecond();
+              for(int64_t i=0;i<Nloop;i++){
+                z = PeriodicBC::CovShiftForward(x,mu,y);
+            }
+            double stop=usecond();
+            double time = (stop-start)/Nloop*1000.0;
+
+            double bytes=3*vol*Nc*Nc*sizeof(Complex);
+            double flops=Nc*Nc*(6+8+8)*vol;
+            std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"   \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
       }
   }
 
@@ -315,28 +344,28 @@ int64_t Nloop=1000;
       LatticeColourMatrix tmp(&Grid);
 
       for(int mu=0;mu<4;mu++){
-	double tshift=0;
-	double tmult =0;
+        double tshift=0;
+        double tmult =0;
 
-	double start=usecond();
-	for(int64_t i=0;i<Nloop;i++){
-	  tshift-=usecond();
-	  tmp = Cshift(y,mu,-1);
-	  tshift+=usecond();
-	  tmult-=usecond();
-	  z   = x*tmp;
-	  tmult+=usecond();
+        double start=usecond();
+        for(int64_t i=0;i<Nloop;i++){
+          tshift-=usecond();
+          tmp = Cshift(y,mu,-1);
+          tshift+=usecond();
+          tmult-=usecond();
+          z   = x*tmp;
+          tmult+=usecond();
 	}
-	double stop=usecond();
-	double time = (stop-start)/Nloop;
-	tshift = tshift/Nloop;
-	tmult  = tmult /Nloop;
-	
-	double bytes=3*vol*Nc*Nc*sizeof(Complex);
-	double flops=Nc*Nc*(6+8+8)*vol;
-	std::cout<<GridLogMessage<<std::setprecision(3) << "total us "<<time<<" shift "<<tshift <<" mult "<<tmult<<std::endl;
-	time = time * 1000; // convert to NS for GB/s
-	std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"   \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
+        double stop=usecond();
+        double time = (stop-start)/Nloop;
+        tshift = tshift/Nloop;
+        tmult  = tmult /Nloop;
+
+        double bytes=3*vol*Nc*Nc*sizeof(Complex);
+        double flops=Nc*Nc*(6+8+8)*vol;
+        std::cout<<GridLogMessage<<std::setprecision(3) << "total us "<<time<<" shift "<<tshift <<" mult "<<tmult<<std::endl;
+        time = time * 1000; // convert to NS for GB/s                                                                                                                                                                                                                                                                                                                                                                                                                                        
+        std::cout<<GridLogMessage<<std::setprecision(3) << lat<<"\t\t"<<bytes<<"   \t\t"<<bytes/time<<"\t\t" << flops/time<<std::endl;
       }
     }
 #endif
