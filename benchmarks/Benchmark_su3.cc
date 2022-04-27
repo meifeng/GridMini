@@ -155,42 +155,60 @@ int64_t Nloop=1000;
                                     map(to:xv._odata[ :xv.size()]) \
                                     map(to:yv._odata[ :yv.size()])
 
-      for(int64_t i=0;i<Nwarm;i++){
-
+  for(int64_t i=0;i<Nwarm;i++) {  
+     int chunkSz = 4;  // TODO: this should be global 
+     int taskNum = 0;  // TODO: this should be a global 
+     int chosenDev = 0; 
+     int numDevs = omp_get_num_devices(); 
+     int numTasks =  (ceil) (vol/chunkSz); 
+	      
+    #pragma omp parallel for schedule(dynamic) private(chosenDev)
+	     for (taskNum = 0; taskNum < numTasks; taskNum++) 
+	      {
+		      chosenDev = omp_get_thread_num()%numDevs; 
+		     
 #ifdef UNROLL_TILE
-
-      #pragma omp target teams distribute parallel for thread_limit(gpu_threads) unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE)
-        for(int64_t s=0;s<vol;s++) { 
+      #pragma omp target teams distribute parallel for simd thread_limit(gpu_threads) unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE) is_device_ptr(taskNum, numTasks) device(chosenDev)
+	for(int64_t s=(taskNum)*(vol/numTasks);s< (taskNum+1)*(vol/numTasks) ;s++) {
             zv[s]=xv[s]*yv[s];
-        }
-
+        } 
 #else
 
-#pragma omp target teams distribute parallel for thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR)
-        for(int64_t s=0; s<vol; s++) {
+#pragma omp target teams distribute parallel for simd thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR) is_device_ptr(taskNum, numTasks) device(chosenDev)
+	for(int64_t s=(taskNum)*(vol/numTasks); s< (taskNum+1)*(vol/numTasks) ;s++) { 
 		zv[s]=xv[s]*yv[s]; 
         }
       #endif
       }
 
+     int chunkSz = 4;  // TODO: this should be global  
+     int taskNum = 0; 
+     int chosenDev = 0; 
+     int numDevs = omp_get_num_devices(); 
+     int numTasks =  (ceil) (vol/chunkSz); 
+	  
       double start=usecond();
       for(int64_t i=0;i<Nloop;i++){
-
+	      
+	      #pragma omp parallel for schedule(dynamic) private(chosenDev)
+	      for (taskNum = 0; taskNum < numTasks; taskNum++) 
+	      {
+		      chosenDev = omp_get_thread_num()%numDevs; 
 #ifdef UNROLL_TILE
-
-      #pragma omp target teams distribute parallel for thread_limit(gpu_threads) unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE)
-        for(int64_t s=0;s<vol;s ++) {
+      #pragma omp target teams distribute parallel for simd thread_limit(gpu_threads)  unroll partial(UNROLL_FACTOR) tile sizes(TILE_SIZE) is_device_ptr(taskNum, numTasks) device(chosenDev)
+      for(int64_t s=(taskNum)*(vol/numTasks);s< (taskNum+1)*(vol/numTasks) ;s++) {
             zv[s]=xv[s]*yv[s];
       }
 
 #else
-
-#pragma omp target teams distribute parallel for thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR)
-      for(int64_t s=0;s<vol;s++) {
+	      
+#pragma omp target teams distribute parallel for simd thread_limit(gpu_threads) tile sizes(TILE_SIZE) unroll partial(UNROLL_FACTOR) is_device_ptr(taskNum, numTasks) device(chosenDev)
+      for(int64_t s=(taskNum)*(vol/numTasks);s< (taskNum+1)*(vol/numTasks) ;s++) {
       	zv[s]=xv[s]*yv[s];
       }
       #endif
-      }  
+     }
+   }  
 
       double stop=usecond();
        #pragma omp target exit data map (from:zv._odata[ :zv.size()])
